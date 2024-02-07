@@ -187,8 +187,9 @@ def scale_loras(lora_list: list, scale: float, step=None, spatial_lora_num=None)
 def tensor_to_vae_latent(t, vae):
     video_length = t.shape[1]
 
-    t = rearrange(t, "b f c h w -> (b f) c h w")
+    t = rearrange(t, "b f c h w -> (b f) c h w").detach()    
     latents = vae.encode(t).latent_dist.sample()
+  
     latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
     latents = latents * 0.18215
 
@@ -339,7 +340,6 @@ class AD_MotionDirector_train:
             validation_seed = 44
             validation_steps = 25
             validation_steps_tuple = [2, 25]
-
 
             # Initialize distributed training
             num_processes   = 1        
@@ -514,7 +514,6 @@ class AD_MotionDirector_train:
 
             global_step = 0
             first_epoch = 0
-            #num_train_epochs = 300
             batch_size = 1
             # Only show the progress bar once on each machine.
             progress_bar = tqdm(range(global_step, max_train_steps))
@@ -744,24 +743,25 @@ class AD_MotionDirector_train:
                             scale_loras(loras, validation_spatial_scale)
                             
                             with torch.inference_mode(False):
-                                unet.eval()
-                                
-                                if len(validation_prompt) == 0:
-                                    prompt = text_prompt
-                                else: 
-                                    prompt = validation_prompt
-                                print(prompt)
-                                sample = validation_pipeline(
-                                    prompt,
-                                    generator    = generator,
-                                    video_length = video_length,
-                                    height       = height,
-                                    width        = width,
-                                ).videos
-                                save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}.gif")
-                                samples.append(sample)
+                                with torch.no_grad():
+                                    unet.eval()
+                                    
+                                    if len(validation_prompt) == 0:
+                                        prompt = text_prompt
+                                    else: 
+                                        prompt = validation_prompt
+                                    print(prompt)
+                                    sample = validation_pipeline(
+                                        prompt,
+                                        generator    = generator,
+                                        video_length = video_length,
+                                        height       = height,
+                                        width        = width,
+                                    ).videos
+                                    save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}.gif")
+                                    samples.append(sample)
                                         
-                                unet.train()
+                                    unet.train()
 
                         samples = torch.concat(samples)
                         save_path = f"{output_dir}/samples/sample-{global_step}.gif"
@@ -816,7 +816,7 @@ class DiffusersLoaderForTraining:
             if download_default and model != "stable-diffusion-v1-5":
                 from huggingface_hub import snapshot_download
                 download_to = os.path.join(folder_paths.models_dir,'diffusers')
-                snapshot_download(repo_id="runwayml/stable-diffusion-v1-5", ignore_patterns=["*.safetensors","*.ckpt", "*.pt", "*.png", "*non_ema*", "*fp16*"], 
+                snapshot_download(repo_id="runwayml/stable-diffusion-v1-5", ignore_patterns=["*.safetensors","*.ckpt", "*.pt", "*.png", "*non_ema*", "*safety_checker*", "*fp16*"], 
                                     local_dir=f"{download_to}/stable-diffusion-v1-5", local_dir_use_symlinks=False)   
                 model_path = "stable-diffusion-v1-5"
             else:
