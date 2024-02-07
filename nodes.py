@@ -28,8 +28,12 @@ from .animatediff.utils.lora import extract_lora_child_module
 from lion_pytorch import Lion
 import comfy.model_management
 import comfy.utils
+import comfy.folder_paths
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
+folder_paths.add_model_folder_path("animatediff_models", str(Path(__file__).parent.parent / "models"))
+folder_paths.add_model_folder_path("animatediff_models", str(Path(folder_paths.models_dir) / "animatediff_models"))
+
 
 augment_text_list = [
     "a video of",
@@ -61,19 +65,19 @@ augment_text_list = [
 ]
 
 def create_save_paths(output_dir: str):
-    lora_path = f"{output_dir}/lora"
+    #lora_path = f"{output_dir}/lora"
 
     directories = [
         output_dir,
         f"{output_dir}/samples",
         f"{output_dir}/sanity_check",
-        lora_path
+        #lora_path
     ]
 
     for directory in directories:
         os.makedirs(directory, exist_ok=True)
 
-    return lora_path
+    #return lora_path
 
 def do_sanity_check(
     pixel_values: torch.Tensor, 
@@ -366,7 +370,10 @@ class AD_MotionDirector_train:
             )
 
             # Handle the output folder creation
-            lora_path = create_save_paths(output_dir)
+            #lora_path = create_save_paths(output_dir)
+            spatial_lora_path = os.path.join(folder_paths.models_dir,"loras", "trained_spatial", date_calendar, date_time, lora_name)
+            temporal_lora_path = os.path.join(folder_paths.models_dir,"animatediff_motion_lora", lora_name, date_calendar, date_time)
+
             #OmegaConf.save(config, os.path.join(output_dir, 'config.yaml'))
 
         # Load scheduler, tokenizer and models.
@@ -441,7 +448,7 @@ class AD_MotionDirector_train:
                 
                 unet_lora_params_temporal, unet_negation_temporal = lora_manager_temporal.add_lora_to_model(
                     True, unet, lora_manager_temporal.unet_replace_modules, 0,
-                    lora_path + '/temporal/', r=lora_rank)
+                    temporal_lora_path, r=lora_rank)
 
                 optimizer_temporal = optimizer(
                     create_optimizer_params([param_optim(unet_lora_params_temporal, True, is_lora=True,
@@ -478,7 +485,7 @@ class AD_MotionDirector_train:
                 lora_managers_spatial.append(lora_manager_spatial)
                 unet_lora_params_spatial, unet_negation_spatial = lora_manager_spatial.add_lora_to_model(
                     True, unet, lora_manager_spatial.unet_replace_modules, lora_unet_dropout,
-                    lora_path + '/spatial/', r=lora_rank)
+                    spatial_lora_path, r=lora_rank)
 
                 unet_lora_params_spatial_list.append(unet_lora_params_spatial)
 
@@ -696,7 +703,7 @@ class AD_MotionDirector_train:
 
                         lora_manager_spatial.save_lora_weights(
                             model=copy.deepcopy(validation_pipeline), 
-                            save_path=lora_path+'/spatial', 
+                            save_path=spatial_lora_path, 
                             step=global_step,
                             use_safetensors=True,
                             lora_rank=lora_rank,
@@ -706,7 +713,7 @@ class AD_MotionDirector_train:
                         if lora_manager_temporal is not None:
                             lora_manager_temporal.save_lora_weights(
                                 model=copy.deepcopy(validation_pipeline), 
-                                save_path=lora_path+'/temporal', 
+                                save_path=temporal_lora_path, 
                                 step=global_step,
                                 use_safetensors=True,
                                 lora_rank=lora_rank,
@@ -754,7 +761,7 @@ class AD_MotionDirector_train:
                                         width        = width,
                                     ).videos
                                     save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}.gif")
-                                    print("samples: ",samples)
+                                    print("samples: ",sample)
                                     samples.append(sample)
                                         
                                 unet.train()
@@ -843,8 +850,6 @@ class DiffusersLoaderForTraining:
             )
             return (unet, text_encoder, tokenizer, vae,)
 
-folder_paths.add_model_folder_path("animatediff_models", str(Path(__file__).parent.parent / "models"))
-folder_paths.add_model_folder_path("animatediff_models", str(Path(folder_paths.models_dir) / "animatediff_models"))
 
 class ValidationModelSelect:
     @classmethod
