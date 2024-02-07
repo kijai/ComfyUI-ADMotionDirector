@@ -737,7 +737,7 @@ class AD_MotionDirector_train:
                             )
                             scale_loras(loras, validation_spatial_scale)
                             
-                            with torch.inference_mode(False):
+                            with torch.inference_mode(True):
                                 with torch.no_grad():
                                     unet.eval()
                                     
