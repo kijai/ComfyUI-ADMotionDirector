@@ -187,7 +187,7 @@ def scale_loras(lora_list: list, scale: float, step=None, spatial_lora_num=None)
 def tensor_to_vae_latent(t, vae):
     video_length = t.shape[1]
 
-    t = rearrange(t, "b f c h w -> (b f) c h w").detach()    
+    t = rearrange(t, "b f c h w -> (b f) c h w") 
     latents = vae.encode(t).latent_dist.sample()
     latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
     latents = latents * 0.18215
@@ -288,7 +288,7 @@ class AD_MotionDirector_train:
 
             input_height, input_width = images.shape[1], images.shape[2]
             images = images * 2.0 - 1.0 #normalize to the expected range (-1, 1)
-            pixel_values = images.clone().requires_grad_(True)
+            pixel_values = images.clone()
             pixel_values = pixel_values.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
 
             text_encoder = clip
@@ -781,7 +781,8 @@ class AD_MotionDirector_train:
 
                     if global_step >= max_train_steps:
                         break
-        return samples,
+        print(samples.shape)
+        return (samples,)
 
 import folder_paths
 class DiffusersLoaderForTraining:
