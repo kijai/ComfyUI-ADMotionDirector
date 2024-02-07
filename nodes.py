@@ -337,7 +337,7 @@ class AD_MotionDirector_train:
 
             validation_spatial_scale = 0.5
             validation_seed = 44
-            validation_steps = 25
+            validation_steps = 50
             validation_steps_tuple = [2, 25]
 
             # Initialize distributed training
@@ -558,16 +558,16 @@ class AD_MotionDirector_train:
                         ]
                         
                     #Data batch sanity check
-                    # if epoch == first_epoch and step == 0:
-                    #         "DO SANITY CHECK"
-                    #         do_sanity_check(
-                    #             pixel_values, 
-                    #             cache_latents, 
-                    #             validation_pipeline, 
-                    #             device, 
-                    #             output_dir=output_dir, 
-                    #             text_prompt=text_prompt
-                    #         )
+                    if epoch == first_epoch and step == 0:
+                            "DO SANITY CHECK"
+                            do_sanity_check(
+                                pixel_values, 
+                                cache_latents, 
+                                validation_pipeline, 
+                                device, 
+                                output_dir=output_dir, 
+                                text_prompt=text_prompt
+                            )
 
                     # Convert videos to latent space 
 
@@ -630,15 +630,11 @@ class AD_MotionDirector_train:
                             if use_hflip:
                                 model_pred_spatial = unet(noisy_latents_input, timesteps,
                                                         encoder_hidden_states=encoder_hidden_states).sample
-                                model_pred_spatial.requires_grad_(True)
-                                target_spatial.requires_grad_(True)
                                 loss_spatial = F.mse_loss(model_pred_spatial[:, :, 0, :, :].float(),
                                                         target_spatial[:, :, 0, :, :].float(), reduction="mean")
                             else:
                                 model_pred_spatial = unet(noisy_latents_input.unsqueeze(2), timesteps,
                                                         encoder_hidden_states=encoder_hidden_states).sample
-                                model_pred_spatial.requires_grad_(True)
-                                target_spatial.requires_grad_(True)
                                 loss_spatial = F.mse_loss(model_pred_spatial[:, :, 0, :, :].float(),
                                                         target_spatial.float(), reduction="mean")
 
@@ -758,9 +754,10 @@ class AD_MotionDirector_train:
                                         width        = width,
                                     ).videos
                                     save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}.gif")
+                                    print("samples shape ",samples.shape)
                                     samples.append(sample)
                                         
-                                    unet.train()
+                                unet.train()
 
                         samples = torch.concat(samples)
                         save_path = f"{output_dir}/samples/sample-{global_step}.gif"
@@ -786,6 +783,9 @@ class AD_MotionDirector_train:
 
 import folder_paths
 class DiffusersLoaderForTraining:
+    @classmethod
+    def IS_CHANGED(s, image, string_field, int_field, float_field, print_to_screen):
+        return ""
     @classmethod
     def INPUT_TYPES(cls):
         paths = []
