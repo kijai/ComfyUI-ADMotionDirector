@@ -28,7 +28,7 @@ from .animatediff.utils.lora import extract_lora_child_module
 from lion_pytorch import Lion
 import comfy.model_management
 import comfy.utils
-import comfy.folder_paths
+import folder_paths
 
 script_directory = os.path.dirname(os.path.abspath(__file__))
 folder_paths.add_model_folder_path("animatediff_models", str(Path(__file__).parent.parent / "models"))
