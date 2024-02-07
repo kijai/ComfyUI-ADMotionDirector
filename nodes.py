@@ -9,20 +9,14 @@ from pathlib import Path
 from tqdm.auto import tqdm
 from einops import rearrange
 from omegaconf import OmegaConf
-#from typing import Dict, Tuple
 
 import torch
 import torchvision
 import torch.nn.functional as F
 
-#import diffusers
 from diffusers import AutoencoderKL, DDIMScheduler, DDPMScheduler
-#from diffusers.models import UNet2DConditionModel
-#from diffusers.pipelines import StableDiffusionPipeline
 from diffusers.optimization import get_scheduler
-#from diffusers.utils import check_min_version
 
-#import transformers
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from .animatediff.models.unet import UNet3DConditionModel
@@ -31,7 +25,6 @@ from .animatediff.utils.util import save_videos_grid, load_diffusers_lora, load_
 from .animatediff.utils.lora_handler import LoraHandler
 from .animatediff.utils.lora import extract_lora_child_module
 
-#from .animatediff.utils.configs import get_simple_config
 from lion_pytorch import Lion
 import comfy.model_management
 import comfy.utils
@@ -822,7 +815,7 @@ class DiffusersLoaderForTraining:
             if model != "":
                 model_path = model
             else:
-                if download_default:
+                if download_default and model_path != "stable-diffusion-v1-5":
                     from huggingface_hub import snapshot_download
                     download_to = os.path.join(folder_paths.models_dir,'diffusers')
                     snapshot_download(repo_id="runwayml/stable-diffusion-v1-5", ignore_patterns=["*.safetensors","*.ckpt", "*.pt", "*.png", "*non_ema*", "*fp16*"], 
