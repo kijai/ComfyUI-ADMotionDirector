@@ -129,7 +129,7 @@ def load_weights(
             dreambooth_state_dict = torch.load(dreambooth_model_path, map_location="cpu")
             
         # 1. vae
-        converted_vae_checkpoint = convert_ldm_vae_checkpoint(dreambooth_state_dict, animation_pipeline.vae.config)
+        converted_vae_checkpoint = convert_ldm_vae_checkpoint(dreambooth_state_dict, animation_pipeline.vae.config, strict=False)
         animation_pipeline.vae.load_state_dict(converted_vae_checkpoint)
         # 2. unet
         converted_unet_checkpoint = convert_ldm_unet_checkpoint(dreambooth_state_dict, animation_pipeline.unet.config)

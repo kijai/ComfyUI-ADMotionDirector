@@ -829,8 +829,6 @@ class DiffusersLoaderForTraining:
             else:
                 model_path = model
             
-                
-
             for search_path in folder_paths.get_folder_paths("diffusers"):
                 if os.path.exists(search_path):
                     path = os.path.join(search_path, model_path)
