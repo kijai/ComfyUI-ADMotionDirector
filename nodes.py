@@ -269,7 +269,7 @@ class AD_MotionDirector_train:
             "learning_rate_spatial": ("FLOAT", {"default": 1e-4, "min": 0, "max": 10000, "step": 0.00001}),
             "checkpointing_steps": ("INT", {"default": 100, "min": -1, "max": 10000, "step": 1}),
             "checkpointing_epochs": ("INT", {"default": -1, "min": -1, "max": 10000, "step": 1}),
-            "lora_rank": ("INT", {"default": 32, "min": 8, "max": 4096, "step": 8}),
+            "lora_rank": ("INT", {"default": 64, "min": 8, "max": 4096, "step": 8}),
             "use_xformers": ("BOOLEAN", {"default": False}),
             },
             }
@@ -754,7 +754,7 @@ class AD_MotionDirector_train:
                                         width        = width,
                                     ).videos
                                     save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}.gif")
-                                    print("samples shape ",samples.shape)
+                                    print("samples: ",samples)
                                     samples.append(sample)
                                         
                                 unet.train()
