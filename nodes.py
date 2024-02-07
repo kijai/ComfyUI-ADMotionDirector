@@ -189,7 +189,6 @@ def tensor_to_vae_latent(t, vae):
 
     t = rearrange(t, "b f c h w -> (b f) c h w").detach()    
     latents = vae.encode(t).latent_dist.sample()
-  
     latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
     latents = latents * 0.18215
 
