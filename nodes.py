@@ -812,14 +812,17 @@ class DiffusersLoaderForTraining:
     def load_checkpoint(self, download_default, model=""):
         with torch.inference_mode(False):
             print(model)
-            if model != "":
-                model_path = model
+           
+            if download_default and model != "stable-diffusion-v1-5":
+                from huggingface_hub import snapshot_download
+                download_to = os.path.join(folder_paths.models_dir,'diffusers')
+                snapshot_download(repo_id="runwayml/stable-diffusion-v1-5", ignore_patterns=["*.safetensors","*.ckpt", "*.pt", "*.png", "*non_ema*", "*fp16*"], 
+                                    local_dir=f"{download_to}/stable-diffusion-v1-5", local_dir_use_symlinks=False)   
+                model_path = "stable-diffusion-v1-5"
             else:
-                if download_default and model_path != "stable-diffusion-v1-5":
-                    from huggingface_hub import snapshot_download
-                    download_to = os.path.join(folder_paths.models_dir,'diffusers')
-                    snapshot_download(repo_id="runwayml/stable-diffusion-v1-5", ignore_patterns=["*.safetensors","*.ckpt", "*.pt", "*.png", "*non_ema*", "*fp16*"], 
-                                      local_dir=f"{download_to}/stable-diffusion-v1-5", local_dir_use_symlinks=False)
+                model_path = model
+            
+                
 
             for search_path in folder_paths.get_folder_paths("diffusers"):
                 if os.path.exists(search_path):
