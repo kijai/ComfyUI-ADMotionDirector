@@ -291,7 +291,7 @@ class AD_MotionDirector_train:
         with torch.inference_mode(False):
            
             motion_module_path, domain_adapter_path, unet_checkpoint_path = validation_models            
-
+            
             video_length = images.shape[0]
 
             input_height, input_width = images.shape[1], images.shape[2]
@@ -328,11 +328,9 @@ class AD_MotionDirector_train:
             is_debug = False
 
             random_hflip_img = -1
-            use_motion_lora_format = True
             single_spatial_lora = True
             lora_rank = 32
             lora_unet_dropout = 0.1
-            train_temporal_lora = True
             target_spatial_modules = ["Transformer3DModel"]
             target_temporal_modules = ["TemporalTransformerBlock"]
 
@@ -382,7 +380,7 @@ class AD_MotionDirector_train:
 
             #OmegaConf.save(config, os.path.join(output_dir, 'config.yaml'))
 
-        # Load scheduler, tokenizer and models.
+            # Load scheduler, tokenizer and models.
             noise_scheduler_kwargs.update({"steps_offset": 1})
             noise_scheduler = DDIMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
             del noise_scheduler_kwargs["steps_offset"]
@@ -399,13 +397,7 @@ class AD_MotionDirector_train:
             vae.requires_grad_(False)
             text_encoder.requires_grad_(False)
 
-            if not use_lion_optim:
-                optimizer = torch.optim.AdamW
-            else:
-                optimizer = Lion
-                learning_rate, learning_rate_spatial = map(lambda lr: lr / 10, (learning_rate, learning_rate_spatial))
-                adam_weight_decay *= 10
-
+            #xformers
             if use_xformers:
                 unet.enable_xformers_memory_efficient_attention()
 
@@ -416,6 +408,31 @@ class AD_MotionDirector_train:
             # Move models to GPU
             vae.to(device)
             text_encoder.to(device)
+            unet.to(device=device)
+            text_encoder.to(device=device)
+
+            # Validation pipeline
+            validation_pipeline = AnimationPipeline(
+                unet=unet, vae=vae, tokenizer=tokenizer, text_encoder=text_encoder, scheduler=noise_scheduler,
+            ).to(device)
+
+            validation_pipeline = load_weights(
+                validation_pipeline, 
+                motion_module_path=motion_module_path,
+                adapter_lora_path=domain_adapter_path, 
+                dreambooth_model_path=unet_checkpoint_path
+            )
+
+            validation_pipeline.enable_vae_slicing()
+            validation_pipeline.to(device)            
+
+
+            if not use_lion_optim:
+                optimizer = torch.optim.AdamW
+            else:
+                optimizer = Lion
+                learning_rate, learning_rate_spatial = map(lambda lr: lr / 10, (learning_rate, learning_rate_spatial))
+                adam_weight_decay *= 10
 
             # Get the training iteration
             if max_train_steps == -1:
@@ -429,53 +446,30 @@ class AD_MotionDirector_train:
             if scale_lr:
                 learning_rate = (learning_rate * gradient_accumulation_steps * train_batch_size * num_processes)
 
-            # Validation pipeline
-            validation_pipeline = AnimationPipeline(
-                unet=unet, vae=vae, tokenizer=tokenizer, text_encoder=text_encoder, scheduler=noise_scheduler,
-            ).to(device)          
-
-            validation_pipeline = load_weights(
-                validation_pipeline, 
-                motion_module_path=motion_module_path,
-                adapter_lora_path=domain_adapter_path, 
-                dreambooth_model_path=unet_checkpoint_path
-            )
-
-            validation_pipeline.enable_vae_slicing()
-            validation_pipeline.to(device)
-
-            unet.to(device=device)
-            text_encoder.to(device=device)
-
             # Temporal LoRA
-            if train_temporal_lora:
-                # one temporal lora
-                lora_manager_temporal = LoraHandler(use_unet_lora=True, unet_replace_modules=target_temporal_modules)
-                
-                unet_lora_params_temporal, unet_negation_temporal = lora_manager_temporal.add_lora_to_model(
-                    True, unet, lora_manager_temporal.unet_replace_modules, 0,
-                    temporal_lora_path, r=lora_rank)
-
-                optimizer_temporal = optimizer(
-                    create_optimizer_params([param_optim(unet_lora_params_temporal, True, is_lora=True,
-                                                        extra_params={**{"lr": learning_rate}}
-                                                        )], learning_rate),
-                    lr=learning_rate,
-                    betas=(adam_beta1, adam_beta2),
-                    weight_decay=adam_weight_decay
-                )
             
-                lr_scheduler_temporal = get_scheduler(
-                    lr_scheduler,
-                    optimizer=optimizer_temporal,
-                    num_warmup_steps=lr_warmup_steps * gradient_accumulation_steps,
-                    num_training_steps=max_train_steps * gradient_accumulation_steps,
-                )
-            else:
-                lora_manager_temporal = None
-                unet_lora_params_temporal, unet_negation_temporal = [], []
-                optimizer_temporal = None
-                lr_scheduler_temporal = None
+            # one temporal lora
+            lora_manager_temporal = LoraHandler(use_unet_lora=True, unet_replace_modules=target_temporal_modules)
+            
+            unet_lora_params_temporal, unet_negation_temporal = lora_manager_temporal.add_lora_to_model(
+                True, unet, lora_manager_temporal.unet_replace_modules, 0,
+                temporal_lora_path, r=lora_rank)
+
+            optimizer_temporal = optimizer(
+                create_optimizer_params([param_optim(unet_lora_params_temporal, True, is_lora=True,
+                                                    extra_params={**{"lr": learning_rate}}
+                                                    )], learning_rate),
+                lr=learning_rate,
+                betas=(adam_beta1, adam_beta2),
+                weight_decay=adam_weight_decay
+            )
+        
+            lr_scheduler_temporal = get_scheduler(
+                lr_scheduler,
+                optimizer=optimizer_temporal,
+                num_warmup_steps=lr_warmup_steps * gradient_accumulation_steps,
+                num_training_steps=max_train_steps * gradient_accumulation_steps,
+            )
 
             # Spatial LoRAs
             if single_spatial_lora:
@@ -550,13 +544,8 @@ class AD_MotionDirector_train:
 
                     if optimizer_temporal is not None:
                         optimizer_temporal.zero_grad(set_to_none=True)
-
-                    if train_temporal_lora:
-                        mask_temporal_lora = False
-                    else:
-                        mask_temporal_lora = True
-
-                    mask_spatial_lora =  random.uniform(0, 1) < 0.2 and not mask_temporal_lora
+     
+                    mask_spatial_lora =  random.uniform(0, 1) < 0.2
 
                     if cfg_random_null_text:
                         text_prompt = [name if random.random() > cfg_random_null_text_ratio else "" for name in text_prompt]
@@ -648,22 +637,16 @@ class AD_MotionDirector_train:
                                                         encoder_hidden_states=encoder_hidden_states).sample
                                 loss_spatial = F.mse_loss(model_pred_spatial[:, :, 0, :, :].float(),
                                                         target_spatial.float(), reduction="mean")
-
-                        if mask_temporal_lora:
-                            loras = extract_lora_child_module(unet, target_replace_module=target_temporal_modules)
-                            scale_loras(loras, 0.)                       
-                            loss_temporal = None
                             
-                        else:
-                            loras = extract_lora_child_module(unet, target_replace_module=target_temporal_modules)
-                            scale_loras(loras, 1.0)
-                           
-                            ### >>>> Temporal LoRA Prediction >>>> ###
-                            noisy_latents = train_noise_scheduler.add_noise(latents, noise, timesteps)
-                            model_pred = unet(noisy_latents, timesteps, encoder_hidden_states=encoder_hidden_states).sample
-                            
-                            loss_temporal = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
-                            loss_temporal = create_ad_temporal_loss(model_pred, loss_temporal, target)
+                        loras = extract_lora_child_module(unet, target_replace_module=target_temporal_modules)
+                        scale_loras(loras, 1.0)
+                        
+                        ### >>>> Temporal LoRA Prediction >>>> ###
+                        noisy_latents = train_noise_scheduler.add_noise(latents, noise, timesteps)
+                        model_pred = unet(noisy_latents, timesteps, encoder_hidden_states=encoder_hidden_states).sample
+                        
+                        loss_temporal = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
+                        loss_temporal = create_ad_temporal_loss(model_pred, loss_temporal, target)
                             
                         # Backpropagate
                         if not mask_spatial_lora:
@@ -677,10 +660,9 @@ class AD_MotionDirector_train:
                                     any(p.grad is not None for p in g["params"]) for g in optimizer_spatial_list[step].param_groups
                                 ):
                                     scaler.step(optimizer_spatial_list[step])
-                                
-                        if not mask_temporal_lora and train_temporal_lora:
-                            scaler.scale(loss_temporal).backward()
-                            scaler.step(optimizer_temporal)
+                                          
+                        scaler.scale(loss_temporal).backward()
+                        scaler.step(optimizer_temporal)
                                 
                         if spatial_lora_num == 1:
                             lr_scheduler_spatial_list[0].step()
@@ -722,7 +704,7 @@ class AD_MotionDirector_train:
                                 use_safetensors=True,
                                 lora_rank=lora_rank,
                                 lora_name=lora_name + "_temporal",
-                                use_motion_lora_format=use_motion_lora_format
+                                use_motion_lora_format=True
                             )
 
                         validation_pipeline.to(device)
@@ -789,17 +771,15 @@ class AD_MotionDirector_train:
 
                     if global_step >= max_train_steps:
                         break
-        print("SAMPLES SHAPE BEFORE PERMUTE: ",samples.shape)
+
         samples = samples.view(*samples.shape[1:])
-        print("SAMPLES SHAPE AFTER VIEW: ",samples.shape)
         samples = samples.permute(1, 2, 3, 0).cpu()
-        print("SAMPLES SHAPE AFTER PERMUTE: ",samples.shape)
         return (samples,)
 
 import folder_paths
 class DiffusersLoaderForTraining:
     @classmethod
-    def IS_CHANGED(s, image, string_field, int_field, float_field, print_to_screen):
+    def IS_CHANGED(s):
         return ""
     @classmethod
     def INPUT_TYPES(cls):
@@ -825,9 +805,7 @@ class DiffusersLoaderForTraining:
     CATEGORY = "AD_MotionDirector"
 
     def load_checkpoint(self, download_default, model=""):
-        with torch.inference_mode(False):
-            print(model)
-           
+        with torch.inference_mode(False):           
             if download_default and model != "stable-diffusion-v1-5":
                 from huggingface_hub import snapshot_download
                 download_to = os.path.join(folder_paths.models_dir,'diffusers')
