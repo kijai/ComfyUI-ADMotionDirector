@@ -274,6 +274,8 @@ class AD_MotionDirector_train:
             "checkpointing_steps": ("INT", {"default": 100, "min": -1, "max": 10000, "step": 1}),
             "checkpointing_epochs": ("INT", {"default": -1, "min": -1, "max": 10000, "step": 1}),
             "lora_rank": ("INT", {"default": 64, "min": 8, "max": 4096, "step": 8}),
+            "validation_steps": ("INT", {"default": 50, "min": -1, "max": 10000, "step": 1}),
+            "extra_validation_at_steps": ("STRING", {"default": "2, 25", },),
             "use_xformers": ("BOOLEAN", {"default": False}),
             },
             }
@@ -285,10 +287,12 @@ class AD_MotionDirector_train:
     CATEGORY = "AD_MotionDirector"
 
     def process(self, validation_models, unet, clip, tokenizer, vae, images, prompt, validation_prompt, 
-                lora_name, max_train_epoch, max_train_steps, learning_rate, learning_rate_spatial, checkpointing_steps, checkpointing_epochs, lora_rank, use_xformers):
+                lora_name, max_train_epoch, max_train_steps, learning_rate, learning_rate_spatial, checkpointing_steps, checkpointing_epochs, lora_rank, validation_steps, extra_validation_at_steps, use_xformers):
         with torch.inference_mode(False):
            
             motion_module_path, domain_adapter_path, unet_checkpoint_path = validation_models            
+
+            video_length = images.shape[0]
 
             input_height, input_width = images.shape[1], images.shape[2]
             images = images * 2.0 - 1.0 #normalize to the expected range (-1, 1)
@@ -339,10 +343,12 @@ class AD_MotionDirector_train:
             use_lion_optim = True
             use_offset_noise = False
 
+            validation_inference_steps = 20
+            validation_guidance_scale = 9
             validation_spatial_scale = 0.5
             validation_seed = 44
-            validation_steps = 50
-            validation_steps_tuple = [2, 25]
+            #validation_steps = 50
+            validation_steps_tuple = tuple(int(step) for step in extra_validation_at_steps.split(','))
 
             # Initialize distributed training
             num_processes   = 1        
@@ -580,8 +586,6 @@ class AD_MotionDirector_train:
 
                     #torch.Size([1, 4, 16, 32, 48])              
                     pixel_values = pixel_values.to(device)
-                    
-                    video_length = pixel_values.shape[2]
                     bsz = pixel_values.shape[0]       
 
                     # Sample a random timestep for each video
@@ -745,26 +749,26 @@ class AD_MotionDirector_train:
                             scale_loras(loras, validation_spatial_scale)
                             
                             with torch.inference_mode(True):
-                                with torch.no_grad():
-                                    unet.eval()
-                                    
-                                    if len(validation_prompt) == 0:
-                                        prompt = text_prompt
-                                    else: 
-                                        prompt = validation_prompt
-                                    print(prompt)
-                                    sample = validation_pipeline(
-                                        prompt,
-                                        generator    = generator,
-                                        video_length = video_length,
-                                        height       = height,
-                                        width        = width,
-                                    ).videos
-                                    save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}.gif")
-                                    print("samples: ",sample)
-                                    samples.append(sample)
+                                unet.eval()
+                                
+                                if len(validation_prompt) == 0:
+                                    prompt = text_prompt
+                                else: 
+                                    prompt = validation_prompt
+                                print(prompt)
+                                sample = validation_pipeline(
+                                    prompt,
+                                    generator    = generator,
+                                    video_length = video_length,
+                                    height       = height,
+                                    width        = width,
+                                    num_inference_steps = validation_inference_steps,
+                                    guidance_scale = validation_guidance_scale,
+                                ).videos
+                                save_videos_grid(sample, f"{output_dir}/samples/sample-{global_step}.gif")
+                                samples.append(sample)
                                         
-                                unet.train()
+                            unet.train()
 
                         samples = torch.concat(samples)
                         save_path = f"{output_dir}/samples/sample-{global_step}.gif"
@@ -785,7 +789,11 @@ class AD_MotionDirector_train:
 
                     if global_step >= max_train_steps:
                         break
-        print(samples.shape)
+        print("SAMPLES SHAPE BEFORE PERMUTE: ",samples.shape)
+        samples = samples.view(*samples.shape[1:])
+        print("SAMPLES SHAPE AFTER VIEW: ",samples.shape)
+        samples = samples.permute(1, 2, 3, 0).cpu()
+        print("SAMPLES SHAPE AFTER PERMUTE: ",samples.shape)
         return (samples,)
 
 import folder_paths
