@@ -284,6 +284,13 @@ class AD_MotionDirector_train:
             ], {
                "default": 'DDIMScheduler'
             }),
+            "optimization_method": (
+            [   
+                'Lion',
+                'AdamW',
+            ], {
+               "default": 'Lion'
+            }),
             },
             }
     
@@ -295,7 +302,7 @@ class AD_MotionDirector_train:
 
     def process(self, validation_models, unet, clip, tokenizer, vae, images, prompt, validation_prompt, 
                 lora_name, max_train_epoch, max_train_steps, learning_rate, learning_rate_spatial, checkpointing_steps, 
-                checkpointing_epochs, lora_rank, validation_steps, extra_validation_at_steps, use_xformers, scheduler):
+                checkpointing_epochs, lora_rank, validation_steps, extra_validation_at_steps, use_xformers, scheduler, optimization_method):
         with torch.inference_mode(False):
            
             motion_module_path, domain_adapter_path, unet_checkpoint_path = validation_models            
@@ -440,10 +447,11 @@ class AD_MotionDirector_train:
             validation_pipeline.enable_vae_slicing()
             validation_pipeline.to(device)            
 
-
-            if not use_lion_optim:
+            if optimization_method == "AdamW":   
+                print("Using AdamW optimizer for training") 
                 optimizer = torch.optim.AdamW
             else:
+                print("Using Lion optimizer for training")
                 optimizer = Lion
                 learning_rate, learning_rate_spatial = map(lambda lr: lr / 10, (learning_rate, learning_rate_spatial))
                 adam_weight_decay *= 10
