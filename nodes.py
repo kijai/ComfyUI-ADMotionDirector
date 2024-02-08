@@ -277,6 +277,13 @@ class AD_MotionDirector_train:
             "validation_steps": ("INT", {"default": 50, "min": -1, "max": 10000, "step": 1}),
             "extra_validation_at_steps": ("STRING", {"default": "2, 25", },),
             "use_xformers": ("BOOLEAN", {"default": False}),
+            "scheduler": (
+            [   
+                'DDIMScheduler',
+                'DDPMScheduler',
+            ], {
+               "default": 'DDIMScheduler'
+            }),
             },
             }
     
@@ -287,7 +294,8 @@ class AD_MotionDirector_train:
     CATEGORY = "AD_MotionDirector"
 
     def process(self, validation_models, unet, clip, tokenizer, vae, images, prompt, validation_prompt, 
-                lora_name, max_train_epoch, max_train_steps, learning_rate, learning_rate_spatial, checkpointing_steps, checkpointing_epochs, lora_rank, validation_steps, extra_validation_at_steps, use_xformers):
+                lora_name, max_train_epoch, max_train_steps, learning_rate, learning_rate_spatial, checkpointing_steps, 
+                checkpointing_epochs, lora_rank, validation_steps, extra_validation_at_steps, use_xformers, scheduler):
         with torch.inference_mode(False):
            
             motion_module_path, domain_adapter_path, unet_checkpoint_path = validation_models            
@@ -385,12 +393,18 @@ class AD_MotionDirector_train:
             noise_scheduler = DDIMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
             del noise_scheduler_kwargs["steps_offset"]
 
-            noise_scheduler_kwargs['beta_schedule'] = 'scaled_linear'
-            train_noise_scheduler_spatial = DDPMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
-            
-            # AnimateDiff uses a linear schedule for its temporal sampling
-            noise_scheduler_kwargs['beta_schedule'] = 'linear'
-            train_noise_scheduler = DDPMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
+            if scheduler == "DDPMScheduler":
+                print("using DDPMScheduler for training")
+                noise_scheduler_kwargs['beta_schedule'] = 'scaled_linear'
+                train_noise_scheduler_spatial = DDPMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
+                noise_scheduler_kwargs['beta_schedule'] = 'linear'
+                train_noise_scheduler = DDPMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
+            else:
+                print("using DDIMScheduler for training")
+                noise_scheduler_kwargs['beta_schedule'] = 'scaled_linear'
+                train_noise_scheduler_spatial = DDIMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
+                noise_scheduler_kwargs['beta_schedule'] = 'linear'
+                train_noise_scheduler = DDIMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
             
             # Freeze all models for LoRA training
             unet.requires_grad_(False)
