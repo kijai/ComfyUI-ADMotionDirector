@@ -336,24 +336,18 @@ class AD_MotionDirector_train:
             gradient_accumulation_steps = 1
             gradient_checkpointing = True
             
-            mixed_precision_training = True
-
-            global_seed = 33
-            
             is_debug = False
 
             random_hflip_img = -1
             single_spatial_lora = True
-            lora_rank = 32
             lora_unet_dropout = 0.1
             target_spatial_modules = ["Transformer3DModel"]
             target_temporal_modules = ["TemporalTransformerBlock"]
 
+            mixed_precision_training = True
             cache_latents = False
-
             train_sample_validation = False
             use_text_augmenter = False
-            use_lion_optim = True
             use_offset_noise = False
 
             validation_inference_steps = 20
@@ -365,7 +359,7 @@ class AD_MotionDirector_train:
 
             # Initialize distributed training
             num_processes   = 1        
-            seed = global_seed
+            seed = 33
             torch.manual_seed(seed)
             
             name = lora_name
