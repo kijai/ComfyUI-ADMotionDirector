@@ -726,7 +726,7 @@ class AD_MotionDirector_train:
                     if (global_step % validation_steps == 0 or global_step in validation_steps_tuple):
                         samples = []
                         generator = torch.Generator(device=latents.device)
-                        generator.manual_seed(global_seed if validation_seed == -1 else validation_seed)
+                        generator.manual_seed(seed if validation_seed == -1 else validation_seed)
                         
                         if not train_sample_validation:
                             height, width = input_height, input_width
