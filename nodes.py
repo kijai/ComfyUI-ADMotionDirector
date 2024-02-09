@@ -258,6 +258,7 @@ class AD_MotionDirector_train:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
+            "validation_settings": ("VALIDATION_SETTINGS", ),
             "validation_models": ("VALIDATION_MODELS", ),      
             "unet": ("MODEL", ),
             "clip": ("CLIP", ),
@@ -274,9 +275,7 @@ class AD_MotionDirector_train:
             "checkpointing_steps": ("INT", {"default": 100, "min": -1, "max": 10000, "step": 1}),
             "checkpointing_epochs": ("INT", {"default": -1, "min": -1, "max": 10000, "step": 1}),
             "lora_rank": ("INT", {"default": 64, "min": 8, "max": 4096, "step": 8}),
-            "validation_steps": ("INT", {"default": 50, "min": -1, "max": 10000, "step": 1}),
-            "extra_validation_at_steps": ("STRING", {"default": "2, 25", },),
-            "use_xformers": ("BOOLEAN", {"default": False}),
+            "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             "scheduler": (
             [   
                 'DDIMScheduler',
@@ -291,7 +290,9 @@ class AD_MotionDirector_train:
             ], {
                "default": 'Lion'
             }),
+            "use_xformers": ("BOOLEAN", {"default": False}),
             },
+            
             }
     
     RETURN_TYPES = ("IMAGE",)
@@ -300,9 +301,9 @@ class AD_MotionDirector_train:
 
     CATEGORY = "AD_MotionDirector"
 
-    def process(self, validation_models, unet, clip, tokenizer, vae, images, prompt, validation_prompt, 
+    def process(self, validation_settings, validation_models, unet, clip, tokenizer, vae, images, prompt, validation_prompt, 
                 lora_name, max_train_epoch, max_train_steps, learning_rate, learning_rate_spatial, checkpointing_steps, 
-                checkpointing_epochs, lora_rank, validation_steps, extra_validation_at_steps, use_xformers, scheduler, optimization_method):
+                checkpointing_epochs, lora_rank, use_xformers, scheduler, seed, optimization_method):
         with torch.inference_mode(False):
            
             motion_module_path, domain_adapter_path, unet_checkpoint_path = validation_models            
@@ -313,6 +314,8 @@ class AD_MotionDirector_train:
             images = images * 2.0 - 1.0 #normalize to the expected range (-1, 1)
             pixel_values = images.clone()
             pixel_values = pixel_values.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
+
+            torch.manual_seed(seed)
 
             text_encoder = clip
             text_prompt = []
@@ -350,20 +353,14 @@ class AD_MotionDirector_train:
             use_text_augmenter = False
             use_offset_noise = False
 
-            validation_inference_steps = 20
-            validation_guidance_scale = 9
-            validation_spatial_scale = 0.5
-            validation_seed = 44
-            #validation_steps = 50
-            validation_steps_tuple = tuple(int(step) for step in extra_validation_at_steps.split(','))
-
-            # Initialize distributed training
-            num_processes   = 1        
-            seed = 33
-            torch.manual_seed(seed)
+            validation_inference_steps = validation_settings["inference_steps"]
+            validation_guidance_scale = validation_settings["guidance_scale"]
+            validation_spatial_scale = validation_settings["spatial_scale"]
+            validation_seed = validation_settings["seed"]
+            validation_steps = validation_settings["steps"]
+            validation_steps_tuple = tuple(int(step) for step in validation_settings["steps_tuple"].split(','))       
             
             name = lora_name
-                
             date_calendar = datetime.datetime.now().strftime("%Y-%m-%d")
             date_time = datetime.datetime.now().strftime("-%H-%M-%S")
             folder_name = "debug" if is_debug else name + date_time
@@ -460,7 +457,7 @@ class AD_MotionDirector_train:
                 checkpointing_steps = checkpointing_epochs
 
             if scale_lr:
-                learning_rate = (learning_rate * gradient_accumulation_steps * train_batch_size * num_processes)
+                learning_rate = (learning_rate * gradient_accumulation_steps * train_batch_size)
 
             # Temporal LoRA
             
@@ -888,14 +885,53 @@ class ValidationModelSelect:
         validation_models.append(adapter_lora_path)
         validation_models.append(model_path)      
         return (validation_models,)
-    
+
+class ValidationSettings:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+        "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+        "inference_steps": ("INT", {"default": 50, "min": 0, "max": 256, "step": 1}),
+        "guidance_scale": ("FLOAT", {"default": 9, "min": 0, "max": 32, "step": 0.1}),
+        "spatial_scale": ("FLOAT", {"default": 0.5, "min": 0, "max": 1, "step": 0.01}),                                        
+        "validate_at_steps": ("INT", {"default": 50, "min": 0, "max": 10000, "step": 1}),
+        "extra_validation_at_steps": ("STRING", {"default": "2, 25", },),
+        
+        },
+          
+        }
+    RETURN_TYPES = ("VALIDATION_SETTINGS",)
+    RETURN_NAMES = ("validation_settings",)
+    FUNCTION = "create_validation_settings"
+
+    CATEGORY = "AD_MotionDirector"
+
+    def create_validation_settings(self, inference_steps, guidance_scale, spatial_scale, seed, validate_at_steps, extra_validation_at_steps):
+        # Create a dictionary with the local variables
+        local_vars = locals()
+        
+        # Filter the dictionary to include only the variables you want
+        validation_settings = {
+            "inference_steps": local_vars["inference_steps"],
+            "guidance_scale": local_vars["guidance_scale"],
+            "spatial_scale": local_vars["spatial_scale"],
+            "seed": local_vars["seed"],
+            "steps": local_vars["validate_at_steps"],
+            "steps_tuple": local_vars["extra_validation_at_steps"]
+        }
+        print(validation_settings)
+        return validation_settings,
+       
 NODE_CLASS_MAPPINGS = {
     "AD_MotionDirector_train": AD_MotionDirector_train,
     "DiffusersLoaderForTraining": DiffusersLoaderForTraining,
-    "ValidationModelSelect": ValidationModelSelect
+    "ValidationModelSelect": ValidationModelSelect,
+    "ValidationSettings": ValidationSettings
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AD_MotionDirector_train": "AD_MotionDirector_train",
     "DiffusersLoaderForTraining": "DiffusersLoaderForTraining",
-    "ValidationModelSelect": "ValidationModelSelect"
+    "ValidationModelSelect": "ValidationModelSelect",
+    "ValidationSettings": "ValidationSettings"
 }
