@@ -10,9 +10,9 @@ import torch.distributed as dist
 from safetensors import safe_open
 from tqdm import tqdm
 from einops import rearrange
-from ...animatediff.utils.convert_from_ckpt import convert_ldm_unet_checkpoint, convert_ldm_clip_checkpoint, convert_ldm_vae_checkpoint
+#from ...animatediff.utils.convert_from_ckpt import convert_ldm_clip_checkpoint, convert_ldm_vae_checkpoint
 from ...animatediff.utils.convert_lora_safetensor_to_diffusers import convert_lora, load_diffusers_lora
-
+from diffusers.loaders.single_file_utils import (convert_ldm_vae_checkpoint, convert_ldm_unet_checkpoint, create_text_encoder_from_ldm_clip_checkpoint)
 
 def zero_rank_print(s):
     if (not dist.is_initialized()) and (dist.is_initialized() and dist.get_rank() == 0): print("### " + s)
@@ -135,7 +135,7 @@ def load_weights(
         converted_unet_checkpoint = convert_ldm_unet_checkpoint(dreambooth_state_dict, animation_pipeline.unet.config)
         animation_pipeline.unet.load_state_dict(converted_unet_checkpoint, strict=False)
         # 3. text_model
-        animation_pipeline.text_encoder = convert_ldm_clip_checkpoint(dreambooth_state_dict)
+        animation_pipeline.text_encoder = create_text_encoder_from_ldm_clip_checkpoint("openai/clip-vit-large-patch14",dreambooth_state_dict)
         del dreambooth_state_dict
         
     # lora layers
