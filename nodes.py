@@ -794,9 +794,10 @@ class AD_MotionDirector_train:
 
 import folder_paths
 class DiffusersLoaderForTraining:
-    #@classmethod
-    #def IS_CHANGED(s):
-    #    return ""
+    #FIX THIS
+    @classmethod
+    def IS_CHANGED(s):
+        return ""
     @classmethod
     def INPUT_TYPES(cls):
         paths = []
