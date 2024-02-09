@@ -135,7 +135,7 @@ def load_weights(
         converted_unet_checkpoint = convert_ldm_unet_checkpoint(dreambooth_state_dict, animation_pipeline.unet.config)
         animation_pipeline.unet.load_state_dict(converted_unet_checkpoint, strict=False)
         # 3. text_model
-        animation_pipeline.text_encoder = convert_ldm_clip_checkpoint(dreambooth_state_dict, strict=False)
+        animation_pipeline.text_encoder = convert_ldm_clip_checkpoint(dreambooth_state_dict)
         del dreambooth_state_dict
         
     # lora layers

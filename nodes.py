@@ -821,8 +821,9 @@ class DiffusersLoaderForTraining:
     CATEGORY = "AD_MotionDirector"
 
     def load_checkpoint(self, download_default, model=""):
-        with torch.inference_mode(False):           
-            if download_default and model != "stable-diffusion-v1-5":
+        with torch.inference_mode(False):
+            target_path = os.path.join(folder_paths.models_dir,'diffusers', "stable-diffusion-v1-5")      
+            if download_default and model != os.path.exists(target_path):
                 from huggingface_hub import snapshot_download
                 download_to = os.path.join(folder_paths.models_dir,'diffusers')
                 snapshot_download(repo_id="runwayml/stable-diffusion-v1-5", ignore_patterns=["*.safetensors","*.ckpt", "*.pt", "*.png", "*non_ema*", "*safety_checker*", "*fp16*"], 
