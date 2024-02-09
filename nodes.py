@@ -25,6 +25,8 @@ from .animatediff.utils.util import save_videos_grid, load_diffusers_lora, load_
 from .animatediff.utils.lora_handler import LoraHandler
 from .animatediff.utils.lora import extract_lora_child_module
 
+from .motion_lora import MotionLoraInfo, MotionLoraList
+
 from lion_pytorch import Lion
 import comfy.model_management
 import comfy.utils
@@ -295,8 +297,8 @@ class AD_MotionDirector_train:
             
             }
     
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES =("image",)
+    RETURN_TYPES = ("IMAGE", "STRING",)
+    RETURN_NAMES =("image", "lora_path",)
     FUNCTION = "process"
 
     CATEGORY = "AD_MotionDirector"
@@ -362,7 +364,7 @@ class AD_MotionDirector_train:
             
             name = lora_name
             date_calendar = datetime.datetime.now().strftime("%Y-%m-%d")
-            date_time = datetime.datetime.now().strftime("-%H-%M-%S")
+            date_time = datetime.datetime.now().strftime("%H-%M-%S")
             folder_name = "debug" if is_debug else name + date_time
 
             output_dir = os.path.join(script_directory, "outputs", date_calendar, folder_name)
@@ -382,9 +384,9 @@ class AD_MotionDirector_train:
             # Handle the output folder creation
             #lora_path = create_save_paths(output_dir)
             spatial_lora_path = os.path.join(folder_paths.models_dir,"loras", "trained_spatial", date_calendar, date_time, lora_name)
-            temporal_lora_path = os.path.join(folder_paths.models_dir,"animatediff_motion_lora", lora_name, date_calendar, date_time)
-
-            #OmegaConf.save(config, os.path.join(output_dir, 'config.yaml'))
+            
+            temporal_lora_path = os.path.join(folder_paths.models_dir,"animatediff_motion_lora", date_calendar, date_time, lora_name)
+            
 
             # Load scheduler, tokenizer and models.
             noise_scheduler_kwargs.update({"steps_offset": 1})
@@ -706,7 +708,7 @@ class AD_MotionDirector_train:
                             step=global_step,
                             use_safetensors=True,
                             lora_rank=lora_rank,
-                            lora_name=lora_name + "_spatial"
+                            lora_name=lora_name + "_r"+ str(lora_rank) + "_spatial",
                         )
 
                         if lora_manager_temporal is not None:
@@ -716,7 +718,7 @@ class AD_MotionDirector_train:
                                 step=global_step,
                                 use_safetensors=True,
                                 lora_rank=lora_rank,
-                                lora_name=lora_name + "_temporal",
+                                lora_name=lora_name + "_r"+ str(lora_rank) + "_temporal",
                                 use_motion_lora_format=True
                             )
 
@@ -784,16 +786,17 @@ class AD_MotionDirector_train:
 
                     if global_step >= max_train_steps:
                         break
-
+        final_temporal_lora_name = os.path.join(date_calendar, date_time, lora_name, (str(max_train_epoch) + "_" + lora_name + "_r"+ str(lora_rank) + "_temporal_unet.safetensors"))
+        print(final_temporal_lora_name)
         samples = samples.view(*samples.shape[1:])
         samples = samples.permute(1, 2, 3, 0).cpu()
-        return (samples,)
+        return (samples, final_temporal_lora_name,)
 
 import folder_paths
 class DiffusersLoaderForTraining:
-    @classmethod
-    def IS_CHANGED(s):
-        return ""
+    #@classmethod
+    #def IS_CHANGED(s):
+    #    return ""
     @classmethod
     def INPUT_TYPES(cls):
         paths = []
@@ -834,7 +837,7 @@ class DiffusersLoaderForTraining:
                     if os.path.exists(path):
                         model_path = path
                         break
-           
+            print("Model path:", model_path)
             config = OmegaConf.load(os.path.join(script_directory, f"configs/training/motion_director/training.yaml"))
             vae          = AutoencoderKL.from_pretrained(model_path, subfolder="vae")
             tokenizer    = CLIPTokenizer.from_pretrained(model_path, subfolder="tokenizer")
@@ -922,16 +925,52 @@ class ValidationSettings:
         }
         print(validation_settings)
         return validation_settings,
+
+class AD_MotionLoraLoader:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "lora_path": ("STRING", {"multiline": False, "default": "",}),
+                "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}),
+            },
+            "optional": {
+                "prev_motion_lora": ("MOTION_LORA",),
+            }
+        }
+    
+    RETURN_TYPES = ("MOTION_LORA",)
+    CATEGORY = "AD_MotionDirector"
+    FUNCTION = "load_motion_lora"
+
+    def load_motion_lora(self, lora_path: str, strength: float, prev_motion_lora: MotionLoraList=None):
+        
+        if prev_motion_lora is None:
+            prev_motion_lora = MotionLoraList()
+        else:
+            prev_motion_lora = prev_motion_lora.clone()
+        full_lora_path = os.path.join(folder_paths.models_dir,"animatediff_motion_lora",lora_path)
+        # check if motion lora with name exists
+        if not Path(full_lora_path).is_file():
+            raise FileNotFoundError(f"Motion lora not found at {full_lora_path}")
+        # create motion lora info to be loaded in AnimateDiff Loader
+        lora_name = os.path.basename(lora_path)
+        lora_info = MotionLoraInfo(name=lora_path, strength=strength)
+        prev_motion_lora.add_lora(lora_info)
+
+        return (prev_motion_lora,)
        
 NODE_CLASS_MAPPINGS = {
     "AD_MotionDirector_train": AD_MotionDirector_train,
     "DiffusersLoaderForTraining": DiffusersLoaderForTraining,
     "ValidationModelSelect": ValidationModelSelect,
-    "ValidationSettings": ValidationSettings
+    "ValidationSettings": ValidationSettings,
+    "AD_MotionLoraLoader": AD_MotionLoraLoader
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AD_MotionDirector_train": "AD_MotionDirector_train",
     "DiffusersLoaderForTraining": "DiffusersLoaderForTraining",
     "ValidationModelSelect": "ValidationModelSelect",
-    "ValidationSettings": "ValidationSettings"
+    "ValidationSettings": "ValidationSettings",
+    "AD_MotionLoraLoader": "AD_MotionLoraLoader"
 }

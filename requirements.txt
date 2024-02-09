@@ -1,4 +1,4 @@
-diffusers>=0.26.0
+diffusers>=0.26.2
 huggingface_hub>=0.20.3
 transformers>=4.27.4
 loralib
@@ -6,3 +6,4 @@ einops
 omegaconf
 lion-pytorch
 peft
+imageio>=2.33.1
