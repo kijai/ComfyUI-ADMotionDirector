@@ -721,6 +721,7 @@ class TrainMotionDirectorLora:
     def INPUT_TYPES(s):
         return {
             "required": {
+                "trigger_input": ("VHS_FILENAMES", ),
                 "admd_pipeline": ("ADMDPIPELINE", ),
                 "steps": ("INT", {"default": 100, "min": 0, "max": 10000, "step": 1}),
             },
@@ -730,7 +731,7 @@ class TrainMotionDirectorLora:
     CATEGORY = "AD_MotionDirector"
     FUNCTION = "train"
 
-    def train(self, admd_pipeline, steps):
+    def train(self, admd_pipeline, steps, trigger_input):
         with torch.inference_mode(False):
             train_noise_scheduler = admd_pipeline["train_noise_scheduler"]
             train_noise_scheduler_spatial = admd_pipeline["train_noise_scheduler_spatial"]
@@ -750,7 +751,7 @@ class TrainMotionDirectorLora:
 
             device = comfy.model_management.get_torch_device()
             comfy.model_management.unload_all_models()
-            
+
             unet.to(device)
             vae.to(device)
             text_encoder.to(device)
