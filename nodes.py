@@ -54,33 +54,19 @@ def create_save_paths(output_dir: str):
 
 def do_sanity_check(
     pixel_values: torch.Tensor, 
-    cache_latents: bool, 
     validation_pipeline: AnimationPipeline, 
     device: str, 
-    image_finetune: bool=False,
     output_dir: str = "",
     text_prompt: str = ""
 ):
-    pixel_values, texts = pixel_values.cpu(), text_prompt
-
-    if cache_latents:
-        pixel_values = validation_pipeline.decode_latents(pixel_values.to(device))
-        to_torch = torch.from_numpy(pixel_values)
-        pixel_values = rearrange(to_torch, 'b c f h w -> b f c h w')
-        
-    if not image_finetune:
-        pixel_values = rearrange(pixel_values, "b f c h w -> b c f h w")
-        for idx, (pixel_value, text) in enumerate(zip(pixel_values, texts)):
-            pixel_value = pixel_value[None, ...]
-            text = text
-            save_name = f"{'-'.join(text.replace('/', '').split()[:10]) if not text == '' else f'-{idx}'}.mp4"
-            save_videos_grid(pixel_value, f"{output_dir}/sanity_check/{save_name}", rescale=not cache_latents)
-    else:
-        for idx, (pixel_value, text) in enumerate(zip(pixel_values, texts)):
-            pixel_value = pixel_value / 2. + 0.5
-            text = text
-            save_name = f"{'-'.join(text.replace('/', '').split()[:10]) if not text == '' else f'-{idx}'}.png"
-            torchvision.utils.save_image(pixel_value, f"{output_dir}/sanity_check/{save_name}")
+    pixel_values, texts = pixel_values.cpu(), text_prompt  
+    pixel_values = rearrange(pixel_values, "b f c h w -> b c f h w")
+    for idx, (pixel_value, text) in enumerate(zip(pixel_values, texts)):
+        pixel_value = pixel_value[None, ...]
+        text = text
+        save_name = f"{'-'.join(text.replace('/', '').split()[:10]) if not text == '' else f'-{idx}'}.mp4"
+        save_videos_grid(pixel_value, f"{output_dir}/sanity_check/{save_name}", rescale=False)
+    return(pixel_values)
 
 def sample_noise(latents, noise_strength, use_offset_noise=False):
     b, c, f, *_ = latents.shape
@@ -235,8 +221,8 @@ class AD_MotionDirector_train:
             
             }
     
-    RETURN_TYPES = ("ADMDPIPELINE", "LORAINFO")
-    RETURN_NAMES =("admd_pipeline", "lora_info",)
+    RETURN_TYPES = ("IMAGE", "ADMDPIPELINE", "LORAINFO")
+    RETURN_NAMES =("sanitycheck", "admd_pipeline", "lora_info",)
     FUNCTION = "process"
 
     CATEGORY = "AD_MotionDirector"
@@ -429,11 +415,19 @@ class AD_MotionDirector_train:
             "validation_pipeline": validation_pipeline,
             "global_step": 0,
         }
-
-      
-        #samples = samples.view(*samples.shape[1:])
-        #samples = samples.permute(1, 2, 3, 0).cpu()
-        return (admd_pipeline, lora_info,)
+        #Data batch sanity check
+        
+        sanitycheck = do_sanity_check(
+            pixel_values,  
+            validation_pipeline, 
+            device, 
+            output_dir=output_dir, 
+            text_prompt=text_prompt
+        )
+ 
+        sanitycheck = sanitycheck.view(*sanitycheck.shape[1:])
+        sanitycheck = sanitycheck.permute(1, 2, 3, 0).cpu()
+        return (sanitycheck, admd_pipeline, lora_info,)
 
 import folder_paths
 class DiffusersLoaderForTraining:
@@ -555,8 +549,7 @@ class DiffusersLoaderForTraining:
                 dreambooth_model_path=unet_checkpoint_path
             )
 
-            validation_pipeline.enable_vae_slicing()
-            validation_pipeline.to(device)            
+            validation_pipeline.enable_vae_slicing()         
 
             pipeline = {
                 'validation_pipeline': validation_pipeline,
@@ -772,7 +765,8 @@ class TrainMotionDirectorLora:
 
             device = comfy.model_management.get_torch_device()
             unet.to(device)
-            
+            vae.to(device)
+
             target_spatial_modules = ["Transformer3DModel"]
             target_temporal_modules = ["TemporalTransformerBlock"]
 
@@ -793,6 +787,17 @@ class TrainMotionDirectorLora:
             progress_bar = tqdm(range(global_step, max_train_steps))
             progress_bar.set_description("Steps")
             pbar = comfy.utils.ProgressBar(batch_size * num_train_epochs)
+            
+            # Get the text embedding for conditioning
+            with torch.no_grad():
+                prompt_ids = tokenizer(
+                    text_prompt, 
+                    max_length=tokenizer.model_max_length, 
+                    padding="max_length", 
+                    truncation=True, 
+                    return_tensors="pt"
+                ).input_ids.to(device)
+                encoder_hidden_states = text_encoder(prompt_ids)[0]
 
             ### <<<< Training <<<< ###
             for epoch in range(first_epoch, num_train_epochs):
@@ -813,44 +818,19 @@ class TrainMotionDirectorLora:
 
                     #if cfg_random_null_text:
                     #    text_prompt = [name if random.random() > cfg_random_null_text_ratio else "" for name in text_prompt]
-                        
-                    #Data batch sanity check
-                    # if epoch == first_epoch and step == 0:
-                    #         "DO SANITY CHECK"
-                    #         do_sanity_check(
-                    #             pixel_values, 
-                    #             cache_latents, 
-                    #             validation_pipeline, 
-                    #             device, 
-                    #             output_dir=output_dir, 
-                    #             text_prompt=text_prompt
-                    #         )
 
-                    # Convert videos to latent space 
-            
-                    pixel_values = pixel_values.to(device)
-                    bsz = pixel_values.shape[0]       
+                    # Convert videos to latent space
+                    pixel_values = pixel_values.to(device)      
 
                     # Sample a random timestep for each video
-                    timesteps = torch.randint(0, 1000, (bsz,), device=pixel_values.device)
+                    timesteps = torch.randint(0, 1000, (1,), device=pixel_values.device)
                     timesteps = timesteps.long()
 
                     # Add noise to the latents according to the noise magnitude at each timestep
                     # (this is the forward diffusion process)
                     latents = tensor_to_vae_latent(pixel_values, vae)
                     noise = sample_noise(latents, 0, use_offset_noise=use_offset_noise)
-                    target = noise         
-
-                    # Get the text embedding for conditioning
-                    with torch.no_grad():
-                        prompt_ids = tokenizer(
-                            text_prompt, 
-                            max_length=tokenizer.model_max_length, 
-                            padding="max_length", 
-                            truncation=True, 
-                            return_tensors="pt"
-                        ).input_ids.to(pixel_values.device)
-                        encoder_hidden_states = text_encoder(prompt_ids)[0]
+                    target = noise
 
                     with torch.cuda.amp.autocast():
                         if mask_spatial_lora:
