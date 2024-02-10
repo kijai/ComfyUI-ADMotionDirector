@@ -770,8 +770,9 @@ class TrainMotionDirectorLora:
 
             use_offset_noise = False
 
-            device = unet.device
-
+            device = comfy.model_management.get_torch_device()
+            unet.to(device)
+            
             target_spatial_modules = ["Transformer3DModel"]
             target_temporal_modules = ["TemporalTransformerBlock"]
 
@@ -784,7 +785,7 @@ class TrainMotionDirectorLora:
 
             # Support mixed-precision training
             scaler = torch.cuda.amp.GradScaler()
-
+            
             num_update_steps_per_epoch = math.ceil(batch_size) / gradient_accumulation_steps
             num_train_epochs = math.ceil(max_train_steps / num_update_steps_per_epoch)
 
