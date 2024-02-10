@@ -53,9 +53,7 @@ def create_save_paths(output_dir: str):
     #return lora_path
 
 def do_sanity_check(
-    pixel_values: torch.Tensor, 
-    validation_pipeline: AnimationPipeline, 
-    device: str, 
+    pixel_values: torch.Tensor,  
     output_dir: str = "",
     text_prompt: str = ""
 ):
@@ -195,17 +193,14 @@ class AD_MotionDirector_train:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-            "validation_settings": ("VALIDATION_SETTINGS", ),
+            #"validation_settings": ("VALIDATION_SETTINGS", ),
             "pipeline": ("PIPELINE", ),
             "lora_name": ("STRING", {"multiline": False, "default": "motiondirectorlora",}),
             "images": ("IMAGE", ),
             "prompt": ("STRING", {"multiline": True, "default": "",}),
-            "max_train_epoch": ("INT", {"default": 300, "min": -1, "max": 10000, "step": 1}),
-            "max_train_steps": ("INT", {"default": -1, "min": -1, "max": 10000, "step": 1}),
+            "max_train_steps": ("INT", {"default": 300, "min": 0, "max": 100000, "step": 1}),
             "learning_rate": ("FLOAT", {"default": 5e-4, "min": 0, "max": 10000, "step": 0.00001}),
-            "learning_rate_spatial": ("FLOAT", {"default": 1e-4, "min": 0, "max": 10000, "step": 0.00001}),
-            "checkpointing_steps": ("INT", {"default": 100, "min": -1, "max": 10000, "step": 1}),
-            "checkpointing_epochs": ("INT", {"default": -1, "min": -1, "max": 10000, "step": 1}),
+            "learning_rate_spatial": ("FLOAT", {"default": 1e-4, "min": 0, "max": 10000, "step": 0.00001}),    
             "lora_rank": ("INT", {"default": 64, "min": 8, "max": 4096, "step": 8}),
             "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             
@@ -227,9 +222,9 @@ class AD_MotionDirector_train:
 
     CATEGORY = "AD_MotionDirector"
 
-    def process(self, pipeline, validation_settings, images, prompt,  
-                lora_name, max_train_epoch, max_train_steps, learning_rate, learning_rate_spatial, checkpointing_steps, 
-                checkpointing_epochs, lora_rank, seed, optimization_method):
+    def process(self, pipeline, images, prompt,  
+                lora_name, learning_rate, learning_rate_spatial, 
+                lora_rank, seed, optimization_method, max_train_steps):
         with torch.inference_mode(False):
                       
             validation_pipeline = pipeline["validation_pipeline"]
@@ -327,15 +322,6 @@ class AD_MotionDirector_train:
                 learning_rate, learning_rate_spatial = map(lambda lr: lr / 10, (learning_rate, learning_rate_spatial))
                 adam_weight_decay *= 10
 
-            # Get the training iteration
-            if max_train_steps == -1:
-                assert max_train_epoch != -1
-                max_train_steps = max_train_epoch
-                
-            if checkpointing_steps == -1:
-                assert checkpointing_epochs != -1
-                checkpointing_steps = checkpointing_epochs
-
             if scale_lr:
                 learning_rate = (learning_rate * gradient_accumulation_steps * train_batch_size)
 
@@ -419,14 +405,13 @@ class AD_MotionDirector_train:
         
         sanitycheck = do_sanity_check(
             pixel_values,  
-            validation_pipeline, 
-            device, 
             output_dir=output_dir, 
             text_prompt=text_prompt
         )
  
         sanitycheck = sanitycheck.view(*sanitycheck.shape[1:])
         sanitycheck = sanitycheck.permute(1, 2, 3, 0).cpu()
+        sanitycheck = (sanitycheck + 1.0) / 2.0
         return (sanitycheck, admd_pipeline, lora_info,)
 
 import folder_paths
