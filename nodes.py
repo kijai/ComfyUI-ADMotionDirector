@@ -749,6 +749,8 @@ class TrainMotionDirectorLora:
             use_offset_noise = False
 
             device = comfy.model_management.get_torch_device()
+            comfy.model_management.unload_all_models()
+            
             unet.to(device)
             vae.to(device)
             text_encoder.to(device)
