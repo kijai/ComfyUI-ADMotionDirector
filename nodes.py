@@ -751,6 +751,8 @@ class TrainMotionDirectorLora:
             device = comfy.model_management.get_torch_device()
             unet.to(device)
             vae.to(device)
+            text_encoder.to(device)
+            tokenizer.to(device)
 
             target_spatial_modules = ["Transformer3DModel"]
             target_temporal_modules = ["TemporalTransformerBlock"]
