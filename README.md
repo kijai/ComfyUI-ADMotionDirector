@@ -1,5 +1,10 @@
 # HEAVILY WORK IN PROGRESS
 
+Install 'pip install -r requirements.txt'
+For portable: 'python_embded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-ADMotionDirector\requirements.txt'
+
+Tested with pytorch 2.1.1 + cu121 and 2.2.0 + cu121, older ones may have issues. 
+
 [ComfyUI](https://github.com/comfyanonymous/ComfyUI) custom nodes for using [AnimateDiff-MotionDirector](https://github.com/ExponentialML/AnimateDiff-MotionDirector)
 
 After training, the LoRAs are intended to be used with the ComfyUI Extension [ComfyUI-AnimateDiff-Evolved](https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved).

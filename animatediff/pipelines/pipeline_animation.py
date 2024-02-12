@@ -393,6 +393,9 @@ class AnimationPipeline(DiffusionPipeline):
         # Prepare extra step kwargs.
         extra_step_kwargs = self.prepare_extra_step_kwargs(generator, eta)
 
+        import comfy.utils
+        pbar = comfy.utils.ProgressBar(num_inference_steps)
+
         # Denoising loop
         num_warmup_steps = len(timesteps) - num_inference_steps * self.scheduler.order
         with self.progress_bar(total=num_inference_steps) as progress_bar:
@@ -450,6 +453,7 @@ class AnimationPipeline(DiffusionPipeline):
                 # call the callback, if provided
                 if i == len(timesteps) - 1 or ((i + 1) > num_warmup_steps and (i + 1) % self.scheduler.order == 0):
                     progress_bar.update()
+                    pbar.update(1)
                     if callback is not None and i % callback_steps == 0:
                         callback(i, t, latents)
 

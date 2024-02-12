@@ -7,3 +7,4 @@ omegaconf
 lion-pytorch
 peft
 imageio>=2.33.1
+imageio-ffmpeg>=0.4.7

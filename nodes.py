@@ -2,7 +2,6 @@ import os
 import math
 import random
 import logging
-import inspect
 import datetime
 
 from pathlib import Path
@@ -11,7 +10,6 @@ from einops import rearrange
 from omegaconf import OmegaConf
 
 import torch
-import torchvision
 import torch.nn.functional as F
 
 from diffusers import AutoencoderKL, DDIMScheduler, DDPMScheduler
@@ -21,7 +19,7 @@ from transformers import CLIPTextModel, CLIPTokenizer
 
 from .animatediff.models.unet import UNet3DConditionModel
 from .animatediff.pipelines.pipeline_animation import AnimationPipeline
-from .animatediff.utils.util import save_videos_grid, load_diffusers_lora, load_weights
+from .animatediff.utils.util import save_videos_grid, load_weights
 from .animatediff.utils.lora_handler import LoraHandler
 from .animatediff.utils.lora import extract_lora_child_module
 
@@ -32,25 +30,18 @@ import comfy.model_management
 import comfy.utils
 import folder_paths
 
-
 script_directory = os.path.dirname(os.path.abspath(__file__))
 folder_paths.add_model_folder_path("animatediff_models", str(Path(__file__).parent.parent / "models"))
 folder_paths.add_model_folder_path("animatediff_models", str(Path(folder_paths.models_dir) / "animatediff_models"))
 
 def create_save_paths(output_dir: str):
-    #lora_path = f"{output_dir}/lora"
-
     directories = [
         output_dir,
         f"{output_dir}/samples",
         f"{output_dir}/sanity_check",
-        #lora_path
     ]
-
     for directory in directories:
         os.makedirs(directory, exist_ok=True)
-
-    #return lora_path
 
 def do_sanity_check(
     pixel_values: torch.Tensor,  
@@ -131,8 +122,7 @@ def create_optimizer_params(model_list, lr):
 
     return optimizer_params
 
-def scale_loras(lora_list: list, scale: float, step=None):
-    
+def scale_loras(lora_list: list, scale: float, step=None): 
     # Assumed enumerator
     if step is not None:
         process_list = range(0, len(lora_list), 1)
@@ -147,7 +137,6 @@ def scale_loras(lora_list: list, scale: float, step=None):
 
 def tensor_to_vae_latent(t, vae):
     video_length = t.shape[1]
-
     t = rearrange(t, "b f c h w -> (b f) c h w") 
     latents = vae.encode(t).latent_dist.sample()
     latents = rearrange(latents, "(b f) c h w -> b c f h w", f=video_length)
@@ -189,11 +178,10 @@ def create_ad_temporal_loss(
 
     return loss_temporal
 
-class AD_MotionDirector_train:
+class ADMD_InitializeTraining:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-            #"validation_settings": ("VALIDATION_SETTINGS", ),
             "pipeline": ("PIPELINE", ),
             "lora_name": ("STRING", {"multiline": False, "default": "motiondirectorlora",}),
             "images": ("IMAGE", ),
@@ -236,9 +224,6 @@ class AD_MotionDirector_train:
             vae = pipeline["vae"]
             tokenizer = pipeline["tokenizer"]
 
-            video_length = images.shape[0]
-
-            input_height, input_width = images.shape[1], images.shape[2]
             images = images * 2.0 - 1.0 #normalize to the expected range (-1, 1)
             pixel_values = images.clone()
             pixel_values = pixel_values.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
@@ -247,8 +232,6 @@ class AD_MotionDirector_train:
 
             text_prompt = []
             text_prompt.append(prompt)
-
-            device = comfy.model_management.get_torch_device()
   
             scale_lr = False
             lr_warmup_steps = 0
@@ -264,17 +247,8 @@ class AD_MotionDirector_train:
 
             lora_unet_dropout = 0.1
             target_spatial_modules = ["Transformer3DModel"]
-            target_temporal_modules = ["TemporalTransformerBlock"]
-            train_sample_validation = False
-            
-            # validation_inference_steps = validation_settings["inference_steps"]
-            # validation_guidance_scale = validation_settings["guidance_scale"]
-            # validation_spatial_scale = validation_settings["spatial_scale"]
-            # validation_seed = validation_settings["seed"]
-            # validation_steps = validation_settings["steps"]
-            # validation_steps_tuple = tuple(int(step) for step in validation_settings["steps_tuple"].split(','))  
-            # validation_prompt = validation_settings["validation_prompt"]     
-            
+            target_temporal_modules = ["TemporalTransformerBlock"]          
+  
             name = lora_name
             date_calendar = datetime.datetime.now().strftime("%Y-%m-%d")
             date_time = datetime.datetime.now().strftime("%H-%M-%S")
@@ -292,8 +266,7 @@ class AD_MotionDirector_train:
                 level=logging.INFO,
             )
 
-            # Handle the output folder creation
-            #lora_path = create_save_paths(output_dir)
+            # set paths
             spatial_lora_path = os.path.join(folder_paths.models_dir,"loras", "trained_spatial", date_calendar, date_time, lora_name) 
             temporal_lora_path = os.path.join(folder_paths.models_dir,"animatediff_motion_lora", date_calendar, date_time, lora_name)
             temporal_lora_base_path = os.path.join(date_calendar, date_time, lora_name)
@@ -379,8 +352,10 @@ class AD_MotionDirector_train:
             # Support mixed-precision training
             if 'scaler' not in globals():
                 scaler = torch.cuda.amp.GradScaler()
+                print("initialize scaler")
             else:
                 scaler.reset()
+                print("reset scaler")
 
         admd_pipeline = {
             "optimizer_temporal": optimizer_temporal,
@@ -412,11 +387,10 @@ class AD_MotionDirector_train:
         sanitycheck = (sanitycheck + 1.0) / 2.0
         return (sanitycheck, admd_pipeline, lora_info,)
 
-import folder_paths
-class DiffusersLoaderForTraining:
-    #@classmethod
-    #def IS_CHANGED(s):
-    #    return ""
+class ADMD_DiffusersLoader:
+    @classmethod
+    def IS_CHANGED(s):
+        return ""
     @classmethod
     def INPUT_TYPES(cls):
         paths = []
@@ -428,7 +402,7 @@ class DiffusersLoaderForTraining:
 
         return {"required":
                 {
-                "validation_models": ("VALIDATION_MODELS", ),  
+                "additional_models": ("ADDITIONAL_MODELS", ),  
                 "download_default": ("BOOLEAN", {"default": False},),
                 "scheduler": (
             [   
@@ -450,7 +424,7 @@ class DiffusersLoaderForTraining:
 
     CATEGORY = "AD_MotionDirector"
 
-    def load_checkpoint(self, download_default, scheduler, use_xformers, validation_models, model=""):
+    def load_checkpoint(self, download_default, scheduler, use_xformers, additional_models, model=""):
         with torch.inference_mode(False):
             device = comfy.model_management.get_torch_device()
             target_path = os.path.join(folder_paths.models_dir,'diffusers', "stable-diffusion-v1-5")      
@@ -524,7 +498,7 @@ class DiffusersLoaderForTraining:
                 unet=unet, vae=vae, tokenizer=tokenizer, text_encoder=text_encoder, scheduler=noise_scheduler,
             ).to(device)
 
-            motion_module_path, domain_adapter_path = validation_models 
+            motion_module_path, domain_adapter_path = additional_models 
 
             validation_pipeline = load_weights(
                 validation_pipeline, 
@@ -547,16 +521,16 @@ class DiffusersLoaderForTraining:
 
             return (pipeline,)
 
-class CheckpointLoaderForTraining:
-    #@classmethod
-    #def IS_CHANGED(s):
-    #    return ""
+class ADMD_CheckpointLoader:
+    @classmethod
+    def IS_CHANGED(s):
+        return ""
     @classmethod
     def INPUT_TYPES(cls):
 
         return {"required":
                 {
-                "validation_models": ("VALIDATION_MODELS", ),
+                "additional_models": ("ADDITIONAL_MODELS", ),
                 "ckpt_name": (folder_paths.get_filename_list("checkpoints"), ),  
                 "scheduler": (
             [   
@@ -574,7 +548,7 @@ class CheckpointLoaderForTraining:
 
     CATEGORY = "AD_MotionDirector"
 
-    def load_checkpoint(self, scheduler, use_xformers, validation_models, ckpt_name):
+    def load_checkpoint(self, scheduler, use_xformers, additional_models, ckpt_name):
         with torch.inference_mode(False):            
             model_path = folder_paths.get_full_path("checkpoints", ckpt_name)
             original_config = OmegaConf.load(os.path.join(script_directory, f"configs/v1-inference.yaml"))
@@ -590,7 +564,8 @@ class CheckpointLoaderForTraining:
                         dreambooth_state_dict[key] = f.get_tensor(key)
             elif model_path.endswith(".ckpt"):
                 dreambooth_state_dict = torch.load(model_path, map_location="cpu")
-
+                while "state_dict" in dreambooth_state_dict:
+                    dreambooth_state_dict = dreambooth_state_dict["state_dict"]
             tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
             text_encoder = create_text_encoder_from_ldm_clip_checkpoint("openai/clip-vit-large-patch14",dreambooth_state_dict)
 
@@ -648,7 +623,7 @@ class CheckpointLoaderForTraining:
             # Enable gradient checkpointing
             unet.enable_gradient_checkpointing()
 
-            motion_module_path, domain_adapter_path = validation_models 
+            motion_module_path, domain_adapter_path = additional_models 
 
             validation_pipeline = load_weights(
                 validation_pipeline, 
@@ -671,7 +646,7 @@ class CheckpointLoaderForTraining:
 
             return (pipeline,)
 
-class AdditionalModelSelect:
+class ADMD_AdditionalModelSelect:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -683,14 +658,14 @@ class AdditionalModelSelect:
                 "optional_adapter_lora": (folder_paths.get_filename_list("loras"),),       
             }
         }
-    RETURN_TYPES = ("VALIDATION_MODELS",)
-    RETURN_NAMES = ("validation_models",)
+    RETURN_TYPES = ("ADDITIONAL_MODELS",)
+    RETURN_NAMES = ("additional_models",)
     FUNCTION = "select_models"
 
     CATEGORY = "AD_MotionDirector"
 
     def select_models(self, motion_module, use_adapter_lora, optional_adapter_lora=""):
-        validation_models = []
+        additional_models = []
         motion_module_path = folder_paths.get_full_path("animatediff_models", motion_module)
 
         if use_adapter_lora:
@@ -698,9 +673,9 @@ class AdditionalModelSelect:
         else:
             adapter_lora_path = ""        
 
-        validation_models.append(motion_module_path)
-        validation_models.append(adapter_lora_path)  
-        return (validation_models,)
+        additional_models.append(motion_module_path)
+        additional_models.append(adapter_lora_path)  
+        return (additional_models,)
 
 class ValidationSettings:
     @classmethod
@@ -708,11 +683,9 @@ class ValidationSettings:
         return {
             "required": {
         "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-        "inference_steps": ("INT", {"default": 50, "min": 0, "max": 256, "step": 1}),
-        "guidance_scale": ("FLOAT", {"default": 9, "min": 0, "max": 32, "step": 0.1}),
+        "inference_steps": ("INT", {"default": 25, "min": 0, "max": 256, "step": 1}),
+        "guidance_scale": ("FLOAT", {"default": 8, "min": 0, "max": 32, "step": 0.1}),
         "spatial_scale": ("FLOAT", {"default": 0.5, "min": 0, "max": 1, "step": 0.01}),                                        
-        "validate_at_steps": ("INT", {"default": 50, "min": 0, "max": 10000, "step": 1}),
-        "extra_validation_steps": ("STRING", {"default": "2, 25", },),
         "validation_prompt": ("STRING", {"multiline": True, "default": "",}),
         },
           
@@ -723,7 +696,7 @@ class ValidationSettings:
 
     CATEGORY = "AD_MotionDirector"
 
-    def create_validation_settings(self, inference_steps, guidance_scale, spatial_scale, seed, validate_at_steps, extra_validation_steps, validation_prompt):
+    def create_validation_settings(self, inference_steps, guidance_scale, spatial_scale, seed, validation_prompt):
         # Create a dictionary with the local variables
         local_vars = locals()
         
@@ -733,14 +706,12 @@ class ValidationSettings:
             "guidance_scale": local_vars["guidance_scale"],
             "spatial_scale": local_vars["spatial_scale"],
             "seed": local_vars["seed"],
-            "steps": local_vars["validate_at_steps"],
-            "steps_tuple": local_vars["extra_validation_steps"],
             "validation_prompt": local_vars["validation_prompt"]
         }
        
         return validation_settings,
 
-class AD_MotionLoraLoader:
+class ADMD_LoadLora:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -768,13 +739,12 @@ class AD_MotionLoraLoader:
         if not Path(full_lora_path).is_file():
             raise FileNotFoundError(f"Motion lora not found at {full_lora_path}")
         # create motion lora info to be loaded in AnimateDiff Loader
-        lora_name = os.path.basename(lora_path)
         lora_info = MotionLoraInfo(name=lora_path, strength=strength)
         prev_motion_lora.add_lora(lora_info)
 
         return (prev_motion_lora,)
 
-class SaveMotionDirectorLora:
+class ADMD_SaveLora:
 
     @classmethod
     def INPUT_TYPES(s):
@@ -786,6 +756,7 @@ class SaveMotionDirectorLora:
         }
     
     RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("lora_path",)
     CATEGORY = "AD_MotionDirector"
     FUNCTION = "save_motion_lora"
 
@@ -828,7 +799,7 @@ class SaveMotionDirectorLora:
        
             return (final_temporal_lora_name,)
 
-class TrainMotionDirectorLora:
+class ADMD_TrainLora:
 
     @classmethod
     def INPUT_TYPES(s):
@@ -841,6 +812,7 @@ class TrainMotionDirectorLora:
         }
     
     RETURN_TYPES = ("ADMDPIPELINE",)
+    RETURN_NAMES = ("admd_pipeline",)
     CATEGORY = "AD_MotionDirector"
     FUNCTION = "train"
 
@@ -848,16 +820,15 @@ class TrainMotionDirectorLora:
         with torch.inference_mode(False):
             train_noise_scheduler = admd_pipeline["train_noise_scheduler"]
             train_noise_scheduler_spatial = admd_pipeline["train_noise_scheduler_spatial"]
-            unet = admd_pipeline["unet"]
+            
             text_encoder = admd_pipeline["text_encoder"]
-            vae = admd_pipeline["vae"]
             tokenizer = admd_pipeline["tokenizer"]
+            
             optimizer_temporal = admd_pipeline["optimizer_temporal"]
             optimizer_spatial_list = admd_pipeline["optimizer_spatial_list"]
             lr_scheduler_spatial_list = admd_pipeline["lr_scheduler_spatial_list"]
             lr_scheduler_temporal = admd_pipeline["lr_scheduler_temporal"]
             text_prompt = admd_pipeline["text_prompt"]
-            unet = admd_pipeline["unet"]
             pixel_values = admd_pipeline["pixel_values"]
             scaler = admd_pipeline["scaler"]
 
@@ -866,10 +837,14 @@ class TrainMotionDirectorLora:
             device = comfy.model_management.get_torch_device()
             comfy.model_management.unload_all_models()
 
+            unet = admd_pipeline["unet"]
+            vae = admd_pipeline["vae"]
+
             unet.to(device)
             vae.to(device)
             text_encoder.to(device)
-            
+            unet.enable_gradient_checkpointing()
+            unet.train()
 
             target_spatial_modules = ["Transformer3DModel"]
             target_temporal_modules = ["TemporalTransformerBlock"]
@@ -901,9 +876,7 @@ class TrainMotionDirectorLora:
                 encoder_hidden_states = text_encoder(prompt_ids)[0]
 
             ### <<<< Training <<<< ###
-            for epoch in range(first_epoch, num_train_epochs):
-                unet.train()
-                
+            for epoch in range(first_epoch, num_train_epochs):                
                 for step in range(batch_size):
                     spatial_scheduler_lr = 0.0
                     temporal_scheduler_lr = 0.0
@@ -992,8 +965,6 @@ class TrainMotionDirectorLora:
                         "Spatial LR": spatial_scheduler_lr
                     }
                     progress_bar.set_postfix(**logs)
-                    
-                    unet.enable_gradient_checkpointing()
 
                     if global_step >= max_train_steps:
                         break
@@ -1007,23 +978,101 @@ class TrainMotionDirectorLora:
             return (admd_pipeline,)
 
 
+class ADMD_ValidationSampler:
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "validation_settings": ("VALIDATION_SETTINGS", ),
+                "admd_pipeline": ("ADMDPIPELINE", ),
+            },
+        }
+    
+    RETURN_TYPES = ("ADMDPIPELINE", "IMAGE",)
+    RETURN_NAMES = ("admd_pipeline", "images",)
+    CATEGORY = "AD_MotionDirector"
+    FUNCTION = "train"
+
+    def train(self, admd_pipeline, validation_settings):
+        with torch.inference_mode(False):       
+            unet = admd_pipeline["unet"]
+            text_encoder = admd_pipeline["text_encoder"]
+            vae = admd_pipeline["vae"]           
+            text_prompt = admd_pipeline["text_prompt"]
+            pixel_values = admd_pipeline["pixel_values"]
+            
+            validation_pipeline = admd_pipeline['validation_pipeline']
+          
+            device = comfy.model_management.get_torch_device()
+
+            video_length, input_height, input_width = pixel_values.shape[1], pixel_values.shape[3], pixel_values.shape[4]
+
+            unet.to(device)
+            vae.to(device)
+            text_encoder.to(device)
+            
+            validation_inference_steps = validation_settings["inference_steps"]
+            validation_guidance_scale = validation_settings["guidance_scale"]
+            validation_spatial_scale = validation_settings["spatial_scale"]
+            validation_seed = validation_settings["seed"]
+            validation_prompt = validation_settings["validation_prompt"]
+                      
+            with torch.inference_mode(True):
+                samples = []
+                generator = torch.Generator(device=device)
+                generator.manual_seed(validation_seed)
+                
+                with torch.cuda.amp.autocast(enabled=True):
+                    unet.disable_gradient_checkpointing()
+                    unet.eval()
+                    loras = extract_lora_child_module(
+                        unet, 
+                        target_replace_module=["Transformer3DModel"]
+                    )
+                    scale_loras(loras, validation_spatial_scale)
+                    
+                    with torch.inference_mode(True):
+                        if len(validation_prompt) == 0:
+                            prompt = text_prompt
+                        else: 
+                            prompt = validation_prompt
+                        
+                        sample = validation_pipeline(
+                            prompt,
+                            generator    = generator,
+                            video_length = video_length,
+                            height       = input_height,
+                            width        = input_width,
+                            num_inference_steps = validation_inference_steps,
+                            guidance_scale = validation_guidance_scale,
+                        ).videos
+                        samples.append(sample)
+                # Reshape the sample tensor for returning
+                samples = torch.concat(samples)
+                samples = samples.view(*samples.shape[1:])
+                samples = samples.permute(1, 2, 3, 0).cpu() 
+                return (admd_pipeline, samples,)
+
 NODE_CLASS_MAPPINGS = {
-    "AD_MotionDirector_train": AD_MotionDirector_train,
-    "DiffusersLoaderForTraining": DiffusersLoaderForTraining,
-    "AdditionalModelSelect": AdditionalModelSelect,
+    "ADMD_InitializeTraining": ADMD_InitializeTraining,
+    "ADMD_DiffusersLoader": ADMD_DiffusersLoader,
+    "ADMD_AdditionalModelSelect": ADMD_AdditionalModelSelect,
     "ValidationSettings": ValidationSettings,
-    "AD_MotionLoraLoader": AD_MotionLoraLoader,
-    "SaveMotionDirectorLora": SaveMotionDirectorLora,
-    "TrainMotionDirectorLora": TrainMotionDirectorLora,
-    "CheckpointLoaderForTraining": CheckpointLoaderForTraining
+    "ADMD_LoadLora": ADMD_LoadLora,
+    "ADMD_SaveLora": ADMD_SaveLora,
+    "ADMD_TrainLora": ADMD_TrainLora,
+    "ADMD_CheckpointLoader": ADMD_CheckpointLoader,
+    "ADMD_ValidationSampler": ADMD_ValidationSampler
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "AD_MotionDirector_train": "AD_MotionDirector_train",
-    "DiffusersLoaderForTraining": "DiffusersLoaderForTraining",
-    "AdditionalModelSelect": "AdditionalModelSelect",
+    "ADMD_InitializeTraining": "ADMD_InitializeTraining",
+    "ADMD_DiffusersLoader": "ADMD_DiffusersLoader",
+    "ADMD_AdditionalModelSelect": "ADMD_AdditionalModelSelect",
     "ValidationSettings": "ValidationSettings",
-    "AD_MotionLoraLoader": "AD_MotionLoraLoader",
-    "SaveMotionDirectorLora": "SaveMotionDirectorLora",
-    "TrainMotionDirectorLora": "TrainMotionDirectorLora",
-    "CheckpointLoaderForTraining": "CheckpointLoaderForTraining"
+    "ADMD_LoadLora": "ADMD_LoadLora",
+    "ADMD_SaveLora": "ADMD_SaveLora",
+    "ADMD_TrainLora": "ADMD_TrainLora",
+    "ADMD_CheckpointLoader": "ADMD_CheckpointLoader",
+    "ADMD_ValidationSampler": "ADMD_ValidationSampler"
 }
