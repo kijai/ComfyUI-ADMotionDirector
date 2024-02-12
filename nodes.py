@@ -468,37 +468,44 @@ class DiffusersLoaderForTraining:
                     path = os.path.join(search_path, model_path)
                     if os.path.exists(path):
                         model_path = path
-                        break
-          
+                        break      
+            
             config = OmegaConf.load(os.path.join(script_directory, f"configs/training/motion_director/training.yaml"))
+       
             vae          = AutoencoderKL.from_pretrained(model_path, subfolder="vae")
             tokenizer    = CLIPTokenizer.from_pretrained(model_path, subfolder="tokenizer")
             text_encoder = CLIPTextModel.from_pretrained(model_path, subfolder="text_encoder")
-            
+         
             unet_additional_kwargs = config.unet_additional_kwargs
             unet = UNet3DConditionModel.from_pretrained_2d(
                 model_path, subfolder="unet", 
                 unet_additional_kwargs=unet_additional_kwargs
             )
-
+            
             # Load scheduler, tokenizer and models.
-            noise_scheduler_kwargs = config.noise_scheduler_kwargs
-            noise_scheduler_kwargs.update({"steps_offset": 1})
-            noise_scheduler = DDIMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
-            del noise_scheduler_kwargs["steps_offset"]
+            noise_scheduler_kwargs = {
+                'num_train_timesteps': 1000,
+                'beta_start':    0.00085,
+                'beta_end':      0.012,
+                'beta_schedule': "linear",
+                'clip_sample':   False,
+                'steps_offset': 1
+            }
+            # Determine the scheduler class based on the scheduler variable
+            SchedulerClass = DDPMScheduler if scheduler == "DDPMScheduler" else DDIMScheduler
+            print(f"using {SchedulerClass.__name__} for training")
 
-            if scheduler == "DDPMScheduler":
-                print("using DDPMScheduler for training")
-                noise_scheduler_kwargs['beta_schedule'] = 'scaled_linear'
-                train_noise_scheduler_spatial = DDPMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
-                noise_scheduler_kwargs['beta_schedule'] = 'linear'
-                train_noise_scheduler = DDPMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
-            else:
-                print("using DDIMScheduler for training")
-                noise_scheduler_kwargs['beta_schedule'] = 'scaled_linear'
-                train_noise_scheduler_spatial = DDIMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
-                noise_scheduler_kwargs['beta_schedule'] = 'linear'
-                train_noise_scheduler = DDIMScheduler(**OmegaConf.to_container(noise_scheduler_kwargs))
+            # Set the beta_schedule and create the default noise scheduler
+            noise_scheduler_kwargs['beta_schedule'] = 'linear'
+            noise_scheduler = SchedulerClass(**noise_scheduler_kwargs)
+
+            # Set the beta_schedule for the spatial noise scheduler and create it
+            noise_scheduler_kwargs['beta_schedule'] = 'scaled_linear'
+            train_noise_scheduler_spatial = SchedulerClass(**noise_scheduler_kwargs)
+
+            # Reset the beta_schedule for the linear noise scheduler and create it
+            noise_scheduler_kwargs['beta_schedule'] = 'linear'
+            train_noise_scheduler = SchedulerClass(**noise_scheduler_kwargs)
             
             # Freeze all models for LoRA training
             unet.requires_grad_(False)
@@ -512,24 +519,18 @@ class DiffusersLoaderForTraining:
             # Enable gradient checkpointing
             unet.enable_gradient_checkpointing()
 
-            # Move models to GPU
-            vae.to(device)
-            text_encoder.to(device)
-            unet.to(device=device)
-            text_encoder.to(device=device)
-
             # Validation pipeline
             validation_pipeline = AnimationPipeline(
                 unet=unet, vae=vae, tokenizer=tokenizer, text_encoder=text_encoder, scheduler=noise_scheduler,
             ).to(device)
 
-            motion_module_path, domain_adapter_path, unet_checkpoint_path = validation_models 
+            motion_module_path, domain_adapter_path = validation_models 
 
             validation_pipeline = load_weights(
                 validation_pipeline, 
                 motion_module_path=motion_module_path,
                 adapter_lora_path=domain_adapter_path, 
-                dreambooth_model_path=unet_checkpoint_path
+                dreambooth_model_path=""
             )
 
             validation_pipeline.enable_vae_slicing()         
@@ -546,19 +547,140 @@ class DiffusersLoaderForTraining:
 
             return (pipeline,)
 
+class CheckpointLoaderForTraining:
+    #@classmethod
+    #def IS_CHANGED(s):
+    #    return ""
+    @classmethod
+    def INPUT_TYPES(cls):
 
-class ValidationModelSelect:
+        return {"required":
+                {
+                "validation_models": ("VALIDATION_MODELS", ),
+                "ckpt_name": (folder_paths.get_filename_list("checkpoints"), ),  
+                "scheduler": (
+            [   
+                'DDIMScheduler',
+                'DDPMScheduler',
+            ], {
+               "default": 'DDIMScheduler'
+            }),
+            "use_xformers": ("BOOLEAN", {"default": False}),
+                },                
+            }
+    RETURN_TYPES = ("PIPELINE",)
+
+    FUNCTION = "load_checkpoint"
+
+    CATEGORY = "AD_MotionDirector"
+
+    def load_checkpoint(self, scheduler, use_xformers, validation_models, ckpt_name):
+        with torch.inference_mode(False):            
+            model_path = folder_paths.get_full_path("checkpoints", ckpt_name)
+            original_config = OmegaConf.load(os.path.join(script_directory, f"configs/v1-inference.yaml"))
+            ad_unet_config = OmegaConf.load(os.path.join(script_directory, f"configs/ad_unet_config.yaml"))
+
+            from diffusers.loaders.single_file_utils import (convert_ldm_vae_checkpoint, convert_ldm_unet_checkpoint, create_text_encoder_from_ldm_clip_checkpoint, create_vae_diffusers_config, create_unet_diffusers_config)
+            from safetensors import safe_open
+
+            if model_path.endswith(".safetensors"):
+                dreambooth_state_dict = {}
+                with safe_open(model_path, framework="pt", device="cpu") as f:
+                    for key in f.keys():
+                        dreambooth_state_dict[key] = f.get_tensor(key)
+            elif model_path.endswith(".ckpt"):
+                dreambooth_state_dict = torch.load(model_path, map_location="cpu")
+
+            tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
+            text_encoder = create_text_encoder_from_ldm_clip_checkpoint("openai/clip-vit-large-patch14",dreambooth_state_dict)
+
+            noise_scheduler_kwargs = {
+                'num_train_timesteps': 1000,
+                'beta_start':    0.00085,
+                'beta_end':      0.012,
+                'beta_schedule': "linear",
+                'clip_sample':   False,
+                'steps_offset': 1
+            }
+            #Determine the scheduler class based on the scheduler variable
+            SchedulerClass = DDPMScheduler if scheduler == "DDPMScheduler" else DDIMScheduler
+            print(f"using {SchedulerClass.__name__} for training")
+
+            # Set the beta_schedule and create the default noise scheduler
+            noise_scheduler_kwargs['beta_schedule'] = 'linear'
+            noise_scheduler = SchedulerClass(**noise_scheduler_kwargs)
+
+            # Set the beta_schedule for the spatial noise scheduler and create it
+            noise_scheduler_kwargs['beta_schedule'] = 'scaled_linear'
+            train_noise_scheduler_spatial = SchedulerClass(**noise_scheduler_kwargs)
+
+            # Reset the beta_schedule for the linear noise scheduler and create it
+            noise_scheduler_kwargs['beta_schedule'] = 'linear'
+            train_noise_scheduler = SchedulerClass(**noise_scheduler_kwargs)
+
+            # 1. vae
+            converted_vae_config = create_vae_diffusers_config(original_config, image_size=512)
+            converted_vae = convert_ldm_vae_checkpoint(dreambooth_state_dict, converted_vae_config)
+            vae = AutoencoderKL(**converted_vae_config)
+            vae.load_state_dict(converted_vae, strict=False)
+
+            # 2. unet
+            converted_unet_config = create_unet_diffusers_config(original_config, image_size=512)
+            converted_unet = convert_ldm_unet_checkpoint(dreambooth_state_dict, converted_unet_config)
+            unet = UNet3DConditionModel(**ad_unet_config)
+            unet.load_state_dict(converted_unet, strict=False)
+
+            del dreambooth_state_dict
+
+            # Validation pipeline
+            validation_pipeline = AnimationPipeline(
+                unet=unet, vae=vae, tokenizer=tokenizer, text_encoder=text_encoder, scheduler=noise_scheduler,
+            )
+            # Freeze all models for LoRA training
+            unet.requires_grad_(False)
+            vae.requires_grad_(False)
+            text_encoder.requires_grad_(False)
+
+            #xformers
+            if use_xformers:
+                unet.enable_xformers_memory_efficient_attention()
+
+            # Enable gradient checkpointing
+            unet.enable_gradient_checkpointing()
+
+            motion_module_path, domain_adapter_path = validation_models 
+
+            validation_pipeline = load_weights(
+                validation_pipeline, 
+                motion_module_path=motion_module_path,
+                adapter_lora_path=domain_adapter_path, 
+                dreambooth_model_path=""
+            )
+
+            validation_pipeline.enable_vae_slicing()         
+
+            pipeline = {
+                'validation_pipeline': validation_pipeline,
+                'train_noise_scheduler': train_noise_scheduler,
+                'train_noise_scheduler_spatial': train_noise_scheduler_spatial,
+                'unet': unet,
+                'vae': vae,
+                'text_encoder': text_encoder,
+                'tokenizer': tokenizer
+            }
+
+            return (pipeline,)
+
+class AdditionalModelSelect:
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": { 
                 "motion_module": (folder_paths.get_filename_list("animatediff_models"),),
-                "use_adapter_lora": ("BOOLEAN", {"default": True}),
-                "use_dreambooth_model": ("BOOLEAN", {"default": False}),                                        
+                "use_adapter_lora": ("BOOLEAN", {"default": True}),                                       
             },
             "optional": {
-                "optional_adapter_lora": (folder_paths.get_filename_list("loras"),), 
-                "optional_model": (folder_paths.get_filename_list("checkpoints"),),       
+                "optional_adapter_lora": (folder_paths.get_filename_list("loras"),),       
             }
         }
     RETURN_TYPES = ("VALIDATION_MODELS",)
@@ -567,7 +689,7 @@ class ValidationModelSelect:
 
     CATEGORY = "AD_MotionDirector"
 
-    def select_models(self, motion_module, use_adapter_lora, use_dreambooth_model, optional_adapter_lora="", optional_model=""):
+    def select_models(self, motion_module, use_adapter_lora, optional_adapter_lora=""):
         validation_models = []
         motion_module_path = folder_paths.get_full_path("animatediff_models", motion_module)
 
@@ -575,14 +697,9 @@ class ValidationModelSelect:
             adapter_lora_path = folder_paths.get_full_path("loras", optional_adapter_lora)
         else:
             adapter_lora_path = ""        
-        if use_dreambooth_model:
-            model_path = folder_paths.get_full_path("checkpoints", optional_model)
-        else:
-            model_path = "" 
 
         validation_models.append(motion_module_path)
-        validation_models.append(adapter_lora_path)
-        validation_models.append(model_path)      
+        validation_models.append(adapter_lora_path)  
         return (validation_models,)
 
 class ValidationSettings:
@@ -893,18 +1010,20 @@ class TrainMotionDirectorLora:
 NODE_CLASS_MAPPINGS = {
     "AD_MotionDirector_train": AD_MotionDirector_train,
     "DiffusersLoaderForTraining": DiffusersLoaderForTraining,
-    "ValidationModelSelect": ValidationModelSelect,
+    "AdditionalModelSelect": AdditionalModelSelect,
     "ValidationSettings": ValidationSettings,
     "AD_MotionLoraLoader": AD_MotionLoraLoader,
     "SaveMotionDirectorLora": SaveMotionDirectorLora,
-    "TrainMotionDirectorLora": TrainMotionDirectorLora
+    "TrainMotionDirectorLora": TrainMotionDirectorLora,
+    "CheckpointLoaderForTraining": CheckpointLoaderForTraining
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AD_MotionDirector_train": "AD_MotionDirector_train",
     "DiffusersLoaderForTraining": "DiffusersLoaderForTraining",
-    "ValidationModelSelect": "ValidationModelSelect",
+    "AdditionalModelSelect": "AdditionalModelSelect",
     "ValidationSettings": "ValidationSettings",
     "AD_MotionLoraLoader": "AD_MotionLoraLoader",
     "SaveMotionDirectorLora": "SaveMotionDirectorLora",
-    "TrainMotionDirectorLora": "TrainMotionDirectorLora"
+    "TrainMotionDirectorLora": "TrainMotionDirectorLora",
+    "CheckpointLoaderForTraining": "CheckpointLoaderForTraining"
 }

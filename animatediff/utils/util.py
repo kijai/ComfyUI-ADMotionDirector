@@ -127,7 +127,7 @@ def load_weights(
                     dreambooth_state_dict[key] = f.get_tensor(key)
         elif dreambooth_model_path.endswith(".ckpt"):
             dreambooth_state_dict = torch.load(dreambooth_model_path, map_location="cpu")
-            
+
         # 1. vae
         converted_vae_checkpoint = convert_ldm_vae_checkpoint(dreambooth_state_dict, animation_pipeline.vae.config)
         animation_pipeline.vae.load_state_dict(converted_vae_checkpoint, strict=False)
