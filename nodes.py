@@ -566,6 +566,7 @@ class ADMD_CheckpointLoader:
                 dreambooth_state_dict = torch.load(model_path, map_location="cpu")
                 while "state_dict" in dreambooth_state_dict:
                     dreambooth_state_dict = dreambooth_state_dict["state_dict"]
+
             tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
             text_encoder = create_text_encoder_from_ldm_clip_checkpoint("openai/clip-vit-large-patch14",dreambooth_state_dict)
 
@@ -677,7 +678,7 @@ class ADMD_AdditionalModelSelect:
         additional_models.append(adapter_lora_path)  
         return (additional_models,)
 
-class ValidationSettings:
+class ADMD_ValidationSettings:
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -1058,7 +1059,7 @@ NODE_CLASS_MAPPINGS = {
     "ADMD_InitializeTraining": ADMD_InitializeTraining,
     "ADMD_DiffusersLoader": ADMD_DiffusersLoader,
     "ADMD_AdditionalModelSelect": ADMD_AdditionalModelSelect,
-    "ValidationSettings": ValidationSettings,
+    "ADMD_ValidationSettings": ADMD_ValidationSettings,
     "ADMD_LoadLora": ADMD_LoadLora,
     "ADMD_SaveLora": ADMD_SaveLora,
     "ADMD_TrainLora": ADMD_TrainLora,
@@ -1069,7 +1070,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ADMD_InitializeTraining": "ADMD_InitializeTraining",
     "ADMD_DiffusersLoader": "ADMD_DiffusersLoader",
     "ADMD_AdditionalModelSelect": "ADMD_AdditionalModelSelect",
-    "ValidationSettings": "ValidationSettings",
+    "ADMD_ValidationSettings": "ADMD_ValidationSettings",
     "ADMD_LoadLora": "ADMD_LoadLora",
     "ADMD_SaveLora": "ADMD_SaveLora",
     "ADMD_TrainLora": "ADMD_TrainLora",
