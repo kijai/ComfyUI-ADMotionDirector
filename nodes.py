@@ -718,7 +718,7 @@ class ADMD_LoadLora:
         return {
             "required": {
                 "lora_path": ("STRING", {"multiline": False, "default": "",}),
-                "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}),
+                "strength": ("FLOAT", {"forceInput": True, "default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}),
             },
             "optional": {
                 "prev_motion_lora": ("MOTION_LORA",),
