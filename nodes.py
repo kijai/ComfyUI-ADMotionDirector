@@ -249,9 +249,6 @@ class AD_MotionDirector_train:
             text_prompt.append(prompt)
 
             device = comfy.model_management.get_torch_device()
-            
-            cfg_random_null_text = True
-            cfg_random_null_text_ratio = 0
   
             scale_lr = False
             lr_warmup_steps = 0
@@ -262,17 +259,14 @@ class AD_MotionDirector_train:
             adam_beta2 = 0.999
             adam_weight_decay = 1e-2
             gradient_accumulation_steps = 1
-            gradient_checkpointing = True
             
             is_debug = False
 
-            single_spatial_lora = True
             lora_unet_dropout = 0.1
             target_spatial_modules = ["Transformer3DModel"]
             target_temporal_modules = ["TemporalTransformerBlock"]
             train_sample_validation = False
             
-
             # validation_inference_steps = validation_settings["inference_steps"]
             # validation_guidance_scale = validation_settings["guidance_scale"]
             # validation_spatial_scale = validation_settings["spatial_scale"]
@@ -286,7 +280,6 @@ class AD_MotionDirector_train:
             date_time = datetime.datetime.now().strftime("%H-%M-%S")
             folder_name = "debug" if is_debug else name + date_time
             
-       
             output_dir = os.path.join(script_directory, "outputs", date_calendar, folder_name)
 
             if is_debug and os.path.exists(output_dir):
@@ -383,7 +376,11 @@ class AD_MotionDirector_train:
             )
             lr_scheduler_spatial_list.append(lr_scheduler_spatial)
            
-            # Train!
+            # Support mixed-precision training
+            if 'scaler' not in globals():
+                scaler = torch.cuda.amp.GradScaler()
+            else:
+                scaler.reset()
 
         admd_pipeline = {
             "optimizer_temporal": optimizer_temporal,
@@ -400,6 +397,7 @@ class AD_MotionDirector_train:
             "train_noise_scheduler_spatial": train_noise_scheduler_spatial,
             "validation_pipeline": validation_pipeline,
             "global_step": 0,
+            "scaler": scaler
         }
         #Data batch sanity check
         
@@ -678,7 +676,6 @@ class SaveMotionDirectorLora:
         with torch.inference_mode(False):
             validation_pipeline = admd_pipeline['validation_pipeline']
             global_step = admd_pipeline['global_step']
-            device = comfy.model_management.get_torch_device()
 
             import copy
             validation_pipeline.to('cpu')  # We do this to prevent VRAM spiking / increase from the new copy
@@ -710,7 +707,6 @@ class SaveMotionDirectorLora:
                     use_motion_lora_format=True
                 )
 
-            #validation_pipeline.to(device)
             final_temporal_lora_name = os.path.join(temporal_lora_base_path, (str(global_step) + "_" + lora_name + "_r"+ str(lora_rank) + "_temporal_unet.safetensors"))
        
             return (final_temporal_lora_name,)
@@ -746,6 +742,7 @@ class TrainMotionDirectorLora:
             text_prompt = admd_pipeline["text_prompt"]
             unet = admd_pipeline["unet"]
             pixel_values = admd_pipeline["pixel_values"]
+            scaler = admd_pipeline["scaler"]
 
             use_offset_noise = False
 
@@ -766,9 +763,6 @@ class TrainMotionDirectorLora:
             global_step = admd_pipeline["global_step"]
             print(f"global_step: {global_step}")
             max_train_steps = steps
-
-            # Support mixed-precision training
-            scaler = torch.cuda.amp.GradScaler()
             
             num_update_steps_per_epoch = math.ceil(batch_size) / gradient_accumulation_steps
             num_train_epochs = math.ceil(max_train_steps / num_update_steps_per_epoch)
@@ -805,11 +799,8 @@ class TrainMotionDirectorLora:
                         optimizer_temporal.zero_grad(set_to_none=True)
         
                     mask_spatial_lora = random.uniform(0, 1) < 0.2
+                    #mask_spatial_lora = 0
 
-                    #if cfg_random_null_text:
-                    #    text_prompt = [name if random.random() > cfg_random_null_text_ratio else "" for name in text_prompt]
-
-                    # Convert videos to latent space
                     pixel_values = pixel_values.to(device)      
 
                     # Sample a random timestep for each video
@@ -889,9 +880,11 @@ class TrainMotionDirectorLora:
 
                     if global_step >= max_train_steps:
                         break
+
             admd_pipeline.update({
                 "global_step": global_step,
                 "unet": unet,
+                "scaler": scaler,
             })
                 
             return (admd_pipeline,)
