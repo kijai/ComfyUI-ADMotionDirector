@@ -824,7 +824,7 @@ class ADMD_TrainLora:
     CATEGORY = "AD_MotionDirector"
     FUNCTION = "train"
 
-    def train(self, admd_pipeline, steps, trigger_input):
+    def train(self, admd_pipeline, steps, trigger_input=None):
         with torch.inference_mode(False):
             train_noise_scheduler = admd_pipeline["train_noise_scheduler"]
             train_noise_scheduler_spatial = admd_pipeline["train_noise_scheduler_spatial"]
