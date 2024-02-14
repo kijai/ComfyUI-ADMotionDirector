@@ -199,7 +199,7 @@ class ADMD_InitializeTraining:
             ], {
                "default": 'Lion'
             }),
-            
+            "include_resnet": ("BOOLEAN", {"default": False}),
             },
             
             }
@@ -212,7 +212,7 @@ class ADMD_InitializeTraining:
 
     def process(self, pipeline, images, prompt,  
                 lora_name, learning_rate, learning_rate_spatial, 
-                lora_rank, seed, optimization_method, max_train_steps):
+                lora_rank, seed, optimization_method, max_train_steps, include_resnet):
         with torch.inference_mode(False):
                       
             validation_pipeline = pipeline["validation_pipeline"]
@@ -246,7 +246,11 @@ class ADMD_InitializeTraining:
             is_debug = False
 
             lora_unet_dropout = 0.1
-            target_spatial_modules = ["Transformer3DModel"]
+            if include_resnet:
+                target_spatial_modules = ["Transformer3DModel", "ResnetBlock2D"]
+            else: 
+                target_spatial_modules = ["Transformer3DModel"]
+
             target_temporal_modules = ["TemporalTransformerBlock"]          
   
             name = lora_name
@@ -372,7 +376,8 @@ class ADMD_InitializeTraining:
             "train_noise_scheduler_spatial": train_noise_scheduler_spatial,
             "validation_pipeline": validation_pipeline,
             "global_step": 0,
-            "scaler": scaler
+            "scaler": scaler,
+            "include_resnet": include_resnet
         }
         #Data batch sanity check
         
@@ -805,11 +810,13 @@ class ADMD_TrainLora:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": {
-                "trigger_input": ("VHS_FILENAMES", ),
+            "required": { 
                 "admd_pipeline": ("ADMDPIPELINE", ),
                 "steps": ("INT", {"default": 100, "min": 0, "max": 10000, "step": 1}),
             },
+            "optional": {
+                "trigger_input": ("VHS_FILENAMES", ), #attempt to force comfy execution order
+            }
         }
     
     RETURN_TYPES = ("ADMDPIPELINE",)
@@ -833,6 +840,7 @@ class ADMD_TrainLora:
             pixel_values = admd_pipeline["pixel_values"]
             scaler = admd_pipeline["scaler"]
 
+            include_resnet = admd_pipeline["include_resnet"]
             use_offset_noise = False
 
             device = comfy.model_management.get_torch_device()
@@ -847,7 +855,11 @@ class ADMD_TrainLora:
             unet.enable_gradient_checkpointing()
             unet.train()
 
-            target_spatial_modules = ["Transformer3DModel"]
+            if include_resnet:
+                target_spatial_modules = ["Transformer3DModel", "ResnetBlock2D"]
+            else: 
+                target_spatial_modules = ["Transformer3DModel"]
+
             target_temporal_modules = ["TemporalTransformerBlock"]
 
             batch_size = 1
