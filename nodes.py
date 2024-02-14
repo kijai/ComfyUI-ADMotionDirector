@@ -722,8 +722,8 @@ class ADMD_LoadLora:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "lora_path": ("STRING", {"multiline": False, "default": "",}),
-                "strength": ("FLOAT", {"forceInput": True, "default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}),
+                "lora_path": ("STRING", {"forceInput": True, "multiline": False, "default": "",}),
+                "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.001}),
             },
             "optional": {
                 "prev_motion_lora": ("MOTION_LORA",),
