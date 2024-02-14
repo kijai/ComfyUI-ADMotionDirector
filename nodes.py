@@ -761,8 +761,8 @@ class ADMD_SaveLora:
             },
         }
     
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("lora_path",)
+    RETURN_TYPES = ("STRING", "ADMDPIPELINE",)
+    RETURN_NAMES = ("lora_path", "admd_pipeline",)
     CATEGORY = "AD_MotionDirector"
     FUNCTION = "save_motion_lora"
 
@@ -803,7 +803,7 @@ class ADMD_SaveLora:
 
             final_temporal_lora_name = os.path.join(temporal_lora_base_path, (str(global_step) + "_" + lora_name + "_r"+ str(lora_rank) + "_temporal_unet.safetensors"))
        
-            return (final_temporal_lora_name,)
+            return (final_temporal_lora_name, admd_pipeline)
 
 class ADMD_TrainLora:
 
