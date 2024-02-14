@@ -1,6 +1,6 @@
 {
-  "last_node_id": 53,
-  "last_link_id": 53,
+  "last_node_id": 63,
+  "last_link_id": 69,
   "nodes": [
     {
       "id": 2,
@@ -65,7 +65,7 @@
       },
       "widgets_values": [
         0,
-        "16"
+        ""
       ]
     },
     {
@@ -273,111 +273,12 @@
           "hidden": false,
           "paused": false,
           "params": {
-            "filename": "AnimateDiff_04023.mp4",
+            "filename": "AnimateDiff_04026.mp4",
             "subfolder": "",
             "type": "output",
             "format": "video/h264-mp4"
           }
         }
-      }
-    },
-    {
-      "id": 33,
-      "type": "ADMD_ValidationSampler",
-      "pos": [
-        3780,
-        560
-      ],
-      "size": {
-        "0": 408.6878356933594,
-        "1": 46.784175872802734
-      },
-      "flags": {},
-      "order": 44,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "validation_settings",
-          "type": "VALIDATION_SETTINGS",
-          "link": 31,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 32
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": null,
-          "shape": 3
-        },
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "links": [
-            33
-          ],
-          "shape": 3,
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_ValidationSampler"
-      }
-    },
-    {
-      "id": 25,
-      "type": "ADMD_ValidationSampler",
-      "pos": [
-        2790,
-        570
-      ],
-      "size": {
-        "0": 408.6878356933594,
-        "1": 46.784175872802734
-      },
-      "flags": {},
-      "order": 33,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "validation_settings",
-          "type": "VALIDATION_SETTINGS",
-          "link": 23,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 24
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            35
-          ],
-          "shape": 3,
-          "slot_index": 0
-        },
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "links": [
-            25
-          ],
-          "shape": 3,
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_ValidationSampler"
       }
     },
     {
@@ -392,7 +293,7 @@
         "1": 78
       },
       "flags": {},
-      "order": 26,
+      "order": 27,
       "mode": 0,
       "inputs": [
         {
@@ -404,7 +305,7 @@
         {
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
-          "link": 37
+          "link": 58
         }
       ],
       "outputs": [
@@ -424,57 +325,6 @@
       "widgets_values": [
         100
       ]
-    },
-    {
-      "id": 29,
-      "type": "ADMD_ValidationSampler",
-      "pos": [
-        3290,
-        560
-      ],
-      "size": {
-        "0": 408.6878356933594,
-        "1": 46.784175872802734
-      },
-      "flags": {},
-      "order": 39,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "validation_settings",
-          "type": "VALIDATION_SETTINGS",
-          "link": 28,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 29
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            34
-          ],
-          "shape": 3,
-          "slot_index": 0
-        },
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "links": [
-            30
-          ],
-          "shape": 3,
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_ValidationSampler"
-      }
     },
     {
       "id": 31,
@@ -601,187 +451,6 @@
       ]
     },
     {
-      "id": 26,
-      "type": "VHS_VideoCombine",
-      "pos": [
-        2780,
-        680
-      ],
-      "size": [
-        458.43035888671875,
-        742.4303588867188
-      ],
-      "flags": {},
-      "order": 37,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 25
-        },
-        {
-          "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
-        },
-        {
-          "name": "batch_manager",
-          "type": "VHS_BatchManager",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "Filenames",
-          "type": "VHS_FILENAMES",
-          "links": [],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VHS_VideoCombine"
-      },
-      "widgets_values": {
-        "frame_rate": 10,
-        "loop_count": 0,
-        "filename_prefix": "AnimateDiff",
-        "format": "video/h264-mp4",
-        "pix_fmt": "yuv420p",
-        "crf": 19,
-        "save_metadata": true,
-        "pingpong": false,
-        "save_output": true,
-        "videopreview": {
-          "hidden": false,
-          "paused": false,
-          "params": {
-            "filename": "AnimateDiff_04020.mp4",
-            "subfolder": "",
-            "type": "output",
-            "format": "video/h264-mp4"
-          }
-        }
-      }
-    },
-    {
-      "id": 14,
-      "type": "VHS_VideoCombine",
-      "pos": [
-        2290,
-        690
-      ],
-      "size": [
-        443.03863525390625,
-        727.0386352539062
-      ],
-      "flags": {},
-      "order": 32,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 16
-        },
-        {
-          "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
-        },
-        {
-          "name": "batch_manager",
-          "type": "VHS_BatchManager",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "Filenames",
-          "type": "VHS_FILENAMES",
-          "links": [],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VHS_VideoCombine"
-      },
-      "widgets_values": {
-        "frame_rate": 10,
-        "loop_count": 0,
-        "filename_prefix": "AnimateDiff",
-        "format": "video/h264-mp4",
-        "pix_fmt": "yuv420p",
-        "crf": 19,
-        "save_metadata": true,
-        "pingpong": false,
-        "save_output": true,
-        "videopreview": {
-          "hidden": false,
-          "paused": false,
-          "params": {
-            "filename": "AnimateDiff_04019.mp4",
-            "subfolder": "",
-            "type": "output",
-            "format": "video/h264-mp4"
-          }
-        }
-      }
-    },
-    {
-      "id": 9,
-      "type": "ADMD_ValidationSampler",
-      "pos": [
-        1790,
-        560
-      ],
-      "size": {
-        "0": 418.1999816894531,
-        "1": 46
-      },
-      "flags": {},
-      "order": 24,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "validation_settings",
-          "type": "VALIDATION_SETTINGS",
-          "link": 21,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 8
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            37
-          ],
-          "shape": 3,
-          "slot_index": 0
-        },
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "links": [
-            10
-          ],
-          "shape": 3,
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_ValidationSampler"
-      }
-    },
-    {
       "id": 22,
       "type": "GetNode",
       "pos": [
@@ -811,201 +480,6 @@
       "widgets_values": [
         "Validation_settings"
       ]
-    },
-    {
-      "id": 11,
-      "type": "VHS_VideoCombine",
-      "pos": [
-        1790,
-        700
-      ],
-      "size": [
-        440.5592956542969,
-        724.5592956542969
-      ],
-      "flags": {},
-      "order": 27,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 10
-        },
-        {
-          "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
-        },
-        {
-          "name": "batch_manager",
-          "type": "VHS_BatchManager",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "Filenames",
-          "type": "VHS_FILENAMES",
-          "links": [],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VHS_VideoCombine"
-      },
-      "widgets_values": {
-        "frame_rate": 10,
-        "loop_count": 0,
-        "filename_prefix": "AnimateDiff",
-        "format": "video/h264-mp4",
-        "pix_fmt": "yuv420p",
-        "crf": 19,
-        "save_metadata": true,
-        "pingpong": false,
-        "save_output": true,
-        "videopreview": {
-          "hidden": false,
-          "paused": false,
-          "params": {
-            "filename": "AnimateDiff_04018.mp4",
-            "subfolder": "",
-            "type": "output",
-            "format": "video/h264-mp4"
-          }
-        }
-      }
-    },
-    {
-      "id": 30,
-      "type": "VHS_VideoCombine",
-      "pos": [
-        3270,
-        690
-      ],
-      "size": [
-        458.43035888671875,
-        742.4303588867188
-      ],
-      "flags": {},
-      "order": 42,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 30
-        },
-        {
-          "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
-        },
-        {
-          "name": "batch_manager",
-          "type": "VHS_BatchManager",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "Filenames",
-          "type": "VHS_FILENAMES",
-          "links": [],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VHS_VideoCombine"
-      },
-      "widgets_values": {
-        "frame_rate": 10,
-        "loop_count": 0,
-        "filename_prefix": "AnimateDiff",
-        "format": "video/h264-mp4",
-        "pix_fmt": "yuv420p",
-        "crf": 19,
-        "save_metadata": true,
-        "pingpong": false,
-        "save_output": true,
-        "videopreview": {
-          "hidden": false,
-          "paused": false,
-          "params": {
-            "filename": "AnimateDiff_04021.mp4",
-            "subfolder": "",
-            "type": "output",
-            "format": "video/h264-mp4"
-          }
-        }
-      }
-    },
-    {
-      "id": 34,
-      "type": "VHS_VideoCombine",
-      "pos": [
-        3770,
-        690
-      ],
-      "size": [
-        458.43035888671875,
-        742.4303588867188
-      ],
-      "flags": {},
-      "order": 46,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 33
-        },
-        {
-          "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
-        },
-        {
-          "name": "batch_manager",
-          "type": "VHS_BatchManager",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "Filenames",
-          "type": "VHS_FILENAMES",
-          "links": [],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "VHS_VideoCombine"
-      },
-      "widgets_values": {
-        "frame_rate": 10,
-        "loop_count": 0,
-        "filename_prefix": "AnimateDiff",
-        "format": "video/h264-mp4",
-        "pix_fmt": "yuv420p",
-        "crf": 19,
-        "save_metadata": true,
-        "pingpong": false,
-        "save_output": true,
-        "videopreview": {
-          "hidden": false,
-          "paused": false,
-          "params": {
-            "filename": "AnimateDiff_04022.mp4",
-            "subfolder": "",
-            "type": "output",
-            "format": "video/h264-mp4"
-          }
-        }
-      }
     },
     {
       "id": 8,
@@ -1039,8 +513,7 @@
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [
-            8,
-            38
+            8
           ],
           "shape": 3,
           "slot_index": 0
@@ -1077,577 +550,6 @@
       "bgcolor": "#653"
     },
     {
-      "id": 40,
-      "type": "Display Any (rgthree)",
-      "pos": [
-        1880,
-        70
-      ],
-      "size": [
-        264.19127308238603,
-        96.30217950994313
-      ],
-      "flags": {},
-      "order": 28,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "source",
-          "type": "*",
-          "link": 39,
-          "dir": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Display Any (rgthree)"
-      },
-      "widgets_values": [
-        ""
-      ]
-    },
-    {
-      "id": 42,
-      "type": "Display Any (rgthree)",
-      "pos": [
-        2360,
-        70
-      ],
-      "size": {
-        "0": 264.1912841796875,
-        "1": 96.30217742919922
-      },
-      "flags": {},
-      "order": 35,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "source",
-          "type": "*",
-          "link": 40,
-          "dir": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Display Any (rgthree)"
-      },
-      "widgets_values": [
-        ""
-      ]
-    },
-    {
-      "id": 13,
-      "type": "ADMD_ValidationSampler",
-      "pos": [
-        2280,
-        570
-      ],
-      "size": {
-        "0": 408.6878356933594,
-        "1": 46.784175872802734
-      },
-      "flags": {},
-      "order": 29,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "validation_settings",
-          "type": "VALIDATION_SETTINGS",
-          "link": 22,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 14
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            27,
-            41
-          ],
-          "shape": 3,
-          "slot_index": 0
-        },
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "links": [
-            16
-          ],
-          "shape": 3,
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_ValidationSampler"
-      }
-    },
-    {
-      "id": 43,
-      "type": "SetNode",
-      "pos": [
-        1653,
-        514
-      ],
-      "size": {
-        "0": 210,
-        "1": 58
-      },
-      "flags": {
-        "collapsed": true
-      },
-      "order": 23,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "LORAINFO",
-          "type": "LORAINFO",
-          "link": 42
-        }
-      ],
-      "outputs": [
-        {
-          "name": "LORAINFO",
-          "type": "LORAINFO",
-          "links": [
-            43
-          ]
-        }
-      ],
-      "title": "Set_lora_info",
-      "properties": {
-        "previousName": "lora_info"
-      },
-      "widgets_values": [
-        "lora_info"
-      ]
-    },
-    {
-      "id": 39,
-      "type": "ADMD_SaveLora",
-      "pos": [
-        1870,
-        220
-      ],
-      "size": {
-        "0": 292.20001220703125,
-        "1": 46
-      },
-      "flags": {},
-      "order": 25,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 38
-        },
-        {
-          "name": "lora_info",
-          "type": "LORAINFO",
-          "link": 43,
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "lora_path",
-          "type": "STRING",
-          "links": [
-            39
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_SaveLora"
-      }
-    },
-    {
-      "id": 41,
-      "type": "ADMD_SaveLora",
-      "pos": [
-        2350,
-        220
-      ],
-      "size": {
-        "0": 292.20001220703125,
-        "1": 46
-      },
-      "flags": {},
-      "order": 31,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 41
-        },
-        {
-          "name": "lora_info",
-          "type": "LORAINFO",
-          "link": 44,
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "lora_path",
-          "type": "STRING",
-          "links": [
-            40
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_SaveLora"
-      }
-    },
-    {
-      "id": 44,
-      "type": "GetNode",
-      "pos": [
-        2197,
-        264
-      ],
-      "size": {
-        "0": 210,
-        "1": 58
-      },
-      "flags": {
-        "collapsed": true
-      },
-      "order": 10,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "LORAINFO",
-          "type": "LORAINFO",
-          "links": [
-            44
-          ]
-        }
-      ],
-      "title": "Get_lora_info",
-      "properties": {},
-      "widgets_values": [
-        "lora_info"
-      ]
-    },
-    {
-      "id": 46,
-      "type": "Display Any (rgthree)",
-      "pos": [
-        2930,
-        60
-      ],
-      "size": {
-        "0": 264.1912841796875,
-        "1": 96.30217742919922
-      },
-      "flags": {},
-      "order": 38,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "source",
-          "type": "*",
-          "link": 46,
-          "dir": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Display Any (rgthree)"
-      },
-      "widgets_values": [
-        ""
-      ]
-    },
-    {
-      "id": 47,
-      "type": "GetNode",
-      "pos": [
-        2770,
-        250
-      ],
-      "size": {
-        "0": 210,
-        "1": 58
-      },
-      "flags": {
-        "collapsed": true
-      },
-      "order": 11,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "LORAINFO",
-          "type": "LORAINFO",
-          "links": [
-            45
-          ]
-        }
-      ],
-      "title": "Get_lora_info",
-      "properties": {},
-      "widgets_values": [
-        "lora_info"
-      ]
-    },
-    {
-      "id": 49,
-      "type": "Display Any (rgthree)",
-      "pos": [
-        3450,
-        60
-      ],
-      "size": {
-        "0": 264.1912841796875,
-        "1": 96.30217742919922
-      },
-      "flags": {},
-      "order": 43,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "source",
-          "type": "*",
-          "link": 48,
-          "dir": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Display Any (rgthree)"
-      },
-      "widgets_values": [
-        ""
-      ]
-    },
-    {
-      "id": 50,
-      "type": "GetNode",
-      "pos": [
-        3290,
-        260
-      ],
-      "size": {
-        "0": 210,
-        "1": 58
-      },
-      "flags": {
-        "collapsed": true
-      },
-      "order": 12,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "LORAINFO",
-          "type": "LORAINFO",
-          "links": [
-            47
-          ]
-        }
-      ],
-      "title": "Get_lora_info",
-      "properties": {},
-      "widgets_values": [
-        "lora_info"
-      ]
-    },
-    {
-      "id": 48,
-      "type": "ADMD_SaveLora",
-      "pos": [
-        3440,
-        210
-      ],
-      "size": {
-        "0": 292.20001220703125,
-        "1": 46
-      },
-      "flags": {},
-      "order": 40,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 52
-        },
-        {
-          "name": "lora_info",
-          "type": "LORAINFO",
-          "link": 47,
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "lora_path",
-          "type": "STRING",
-          "links": [
-            48
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_SaveLora"
-      }
-    },
-    {
-      "id": 52,
-      "type": "Display Any (rgthree)",
-      "pos": [
-        3950,
-        60
-      ],
-      "size": {
-        "0": 264.1912841796875,
-        "1": 96.30217742919922
-      },
-      "flags": {},
-      "order": 47,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "source",
-          "type": "*",
-          "link": 50,
-          "dir": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Display Any (rgthree)"
-      },
-      "widgets_values": [
-        ""
-      ]
-    },
-    {
-      "id": 53,
-      "type": "GetNode",
-      "pos": [
-        3780,
-        250
-      ],
-      "size": {
-        "0": 210,
-        "1": 58
-      },
-      "flags": {
-        "collapsed": true
-      },
-      "order": 13,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "LORAINFO",
-          "type": "LORAINFO",
-          "links": [
-            49
-          ]
-        }
-      ],
-      "title": "Get_lora_info",
-      "properties": {},
-      "widgets_values": [
-        "lora_info"
-      ]
-    },
-    {
-      "id": 51,
-      "type": "ADMD_SaveLora",
-      "pos": [
-        3940,
-        210
-      ],
-      "size": {
-        "0": 292.20001220703125,
-        "1": 46
-      },
-      "flags": {},
-      "order": 45,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 53
-        },
-        {
-          "name": "lora_info",
-          "type": "LORAINFO",
-          "link": 49,
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "lora_path",
-          "type": "STRING",
-          "links": [
-            50
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_SaveLora"
-      }
-    },
-    {
-      "id": 45,
-      "type": "ADMD_SaveLora",
-      "pos": [
-        2920,
-        210
-      ],
-      "size": {
-        "0": 292.20001220703125,
-        "1": 46
-      },
-      "flags": {},
-      "order": 34,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 51
-        },
-        {
-          "name": "lora_info",
-          "type": "LORAINFO",
-          "link": 45,
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "lora_path",
-          "type": "STRING",
-          "links": [
-            46
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_SaveLora"
-      }
-    },
-    {
       "id": 24,
       "type": "ADMD_TrainLora",
       "pos": [
@@ -1659,7 +561,7 @@
         "1": 78
       },
       "flags": {},
-      "order": 30,
+      "order": 31,
       "mode": 0,
       "inputs": [
         {
@@ -1671,7 +573,7 @@
         {
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
-          "link": 27,
+          "link": 64,
           "slot_index": 1
         }
       ],
@@ -1680,8 +582,7 @@
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [
-            24,
-            51
+            24
           ],
           "shape": 3,
           "slot_index": 0
@@ -1706,7 +607,7 @@
         "1": 78
       },
       "flags": {},
-      "order": 36,
+      "order": 35,
       "mode": 0,
       "inputs": [
         {
@@ -1718,7 +619,7 @@
         {
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
-          "link": 35
+          "link": 65
         }
       ],
       "outputs": [
@@ -1726,8 +627,7 @@
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [
-            29,
-            52
+            29
           ],
           "shape": 3,
           "slot_index": 0
@@ -1752,7 +652,7 @@
         "1": 78
       },
       "flags": {},
-      "order": 41,
+      "order": 39,
       "mode": 0,
       "inputs": [
         {
@@ -1764,7 +664,7 @@
         {
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
-          "link": 34
+          "link": 66
         }
       ],
       "outputs": [
@@ -1772,8 +672,7 @@
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [
-            32,
-            53
+            32
           ],
           "shape": 3,
           "slot_index": 0
@@ -1798,7 +697,7 @@
         399.4666646321615
       ],
       "flags": {},
-      "order": 14,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
@@ -1926,7 +825,7 @@
         0.0005,
         0.0001,
         64,
-        564254891369128,
+        761925322748817,
         "randomize",
         "Lion",
         true
@@ -1939,12 +838,12 @@
         770,
         -20
       ],
-      "size": [
-        391.4627899169918,
-        234.64732971191387
-      ],
+      "size": {
+        "0": 391.4627990722656,
+        "1": 234.64732360839844
+      },
       "flags": {},
-      "order": 15,
+      "order": 11,
       "mode": 0,
       "outputs": [
         {
@@ -1961,7 +860,7 @@
         "Node name for S&R": "ADMD_ValidationSettings"
       },
       "widgets_values": [
-        163478945773040,
+        100052590868887,
         "randomize",
         25,
         8,
@@ -2022,6 +921,988 @@
         "nearest",
         false,
         "always"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "ADMD_ValidationSampler",
+      "pos": [
+        1790,
+        560
+      ],
+      "size": {
+        "0": 418.1999816894531,
+        "1": 46
+      },
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "validation_settings",
+          "type": "VALIDATION_SETTINGS",
+          "link": 21,
+          "slot_index": 0
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            56
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            10
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_ValidationSampler"
+      }
+    },
+    {
+      "id": 11,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        1785,
+        782
+      ],
+      "size": [
+        440.5592956542969,
+        619.4194717407227
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 10
+        },
+        {
+          "name": "audio",
+          "type": "VHS_AUDIO",
+          "link": null
+        },
+        {
+          "name": "batch_manager",
+          "type": "VHS_BatchManager",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 10,
+        "loop_count": 0,
+        "filename_prefix": "AnimateDiff",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_04024.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4"
+          }
+        }
+      }
+    },
+    {
+      "id": 57,
+      "type": "GetNode",
+      "pos": [
+        2272,
+        727
+      ],
+      "size": {
+        "0": 210,
+        "1": 58
+      },
+      "flags": {
+        "collapsed": true
+      },
+      "order": 12,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "LORAINFO",
+          "type": "LORAINFO",
+          "links": [
+            59
+          ]
+        }
+      ],
+      "title": "Get_lora_info",
+      "properties": {},
+      "widgets_values": [
+        "lora_info"
+      ]
+    },
+    {
+      "id": 61,
+      "type": "GetNode",
+      "pos": [
+        3280,
+        710
+      ],
+      "size": {
+        "0": 210,
+        "1": 58
+      },
+      "flags": {
+        "collapsed": true
+      },
+      "order": 13,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "LORAINFO",
+          "type": "LORAINFO",
+          "links": [
+            61
+          ]
+        }
+      ],
+      "title": "Get_lora_info",
+      "properties": {},
+      "widgets_values": [
+        "lora_info"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "ADMD_ValidationSampler",
+      "pos": [
+        2280,
+        570
+      ],
+      "size": {
+        "0": 408.6878356933594,
+        "1": 46.784175872802734
+      },
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "validation_settings",
+          "type": "VALIDATION_SETTINGS",
+          "link": 22,
+          "slot_index": 0
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            63
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            16
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_ValidationSampler"
+      }
+    },
+    {
+      "id": 25,
+      "type": "ADMD_ValidationSampler",
+      "pos": [
+        2790,
+        570
+      ],
+      "size": {
+        "0": 408.6878356933594,
+        "1": 46.784175872802734
+      },
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "validation_settings",
+          "type": "VALIDATION_SETTINGS",
+          "link": 23,
+          "slot_index": 0
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            67
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            25
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_ValidationSampler"
+      }
+    },
+    {
+      "id": 29,
+      "type": "ADMD_ValidationSampler",
+      "pos": [
+        3290,
+        560
+      ],
+      "size": {
+        "0": 408.6878356933594,
+        "1": 46.784175872802734
+      },
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "validation_settings",
+          "type": "VALIDATION_SETTINGS",
+          "link": 28,
+          "slot_index": 0
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            68
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            30
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_ValidationSampler"
+      }
+    },
+    {
+      "id": 33,
+      "type": "ADMD_ValidationSampler",
+      "pos": [
+        3780,
+        560
+      ],
+      "size": {
+        "0": 408.6878356933594,
+        "1": 46.784175872802734
+      },
+      "flags": {},
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "validation_settings",
+          "type": "VALIDATION_SETTINGS",
+          "link": 31,
+          "slot_index": 0
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            69
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            33
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_ValidationSampler"
+      }
+    },
+    {
+      "id": 59,
+      "type": "GetNode",
+      "pos": [
+        2799,
+        713
+      ],
+      "size": {
+        "0": 210,
+        "1": 58
+      },
+      "flags": {
+        "collapsed": true
+      },
+      "order": 14,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "LORAINFO",
+          "type": "LORAINFO",
+          "links": [
+            60
+          ]
+        }
+      ],
+      "title": "Get_lora_info",
+      "properties": {},
+      "widgets_values": [
+        "lora_info"
+      ]
+    },
+    {
+      "id": 58,
+      "type": "ADMD_SaveLora",
+      "pos": [
+        2956,
+        665
+      ],
+      "size": [
+        228.39999389648438,
+        46
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 67
+        },
+        {
+          "name": "lora_info",
+          "type": "LORAINFO",
+          "link": 60,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            65
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_SaveLora"
+      }
+    },
+    {
+      "id": 56,
+      "type": "ADMD_SaveLora",
+      "pos": [
+        2448,
+        679
+      ],
+      "size": [
+        228.39999389648438,
+        46
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 63
+        },
+        {
+          "name": "lora_info",
+          "type": "LORAINFO",
+          "link": 59,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            64
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_SaveLora"
+      }
+    },
+    {
+      "id": 54,
+      "type": "ADMD_SaveLora",
+      "pos": [
+        1965,
+        657
+      ],
+      "size": [
+        228.39999389648438,
+        46
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 56
+        },
+        {
+          "name": "lora_info",
+          "type": "LORAINFO",
+          "link": 57,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            58
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_SaveLora"
+      }
+    },
+    {
+      "id": 60,
+      "type": "ADMD_SaveLora",
+      "pos": [
+        3462,
+        666
+      ],
+      "size": [
+        228.39999389648438,
+        46
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 68
+        },
+        {
+          "name": "lora_info",
+          "type": "LORAINFO",
+          "link": 61,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            66
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_SaveLora"
+      }
+    },
+    {
+      "id": 62,
+      "type": "ADMD_SaveLora",
+      "pos": [
+        3957,
+        670
+      ],
+      "size": [
+        228.39999389648438,
+        46
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 69
+        },
+        {
+          "name": "lora_info",
+          "type": "LORAINFO",
+          "link": 62,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_SaveLora"
+      }
+    },
+    {
+      "id": 63,
+      "type": "GetNode",
+      "pos": [
+        3777,
+        709
+      ],
+      "size": {
+        "0": 210,
+        "1": 58
+      },
+      "flags": {
+        "collapsed": true
+      },
+      "order": 15,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "LORAINFO",
+          "type": "LORAINFO",
+          "links": [
+            62
+          ]
+        }
+      ],
+      "title": "Get_lora_info",
+      "properties": {},
+      "widgets_values": [
+        "lora_info"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        2284,
+        788
+      ],
+      "size": [
+        443.03863525390625,
+        621.2789764404297
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 16
+        },
+        {
+          "name": "audio",
+          "type": "VHS_AUDIO",
+          "link": null
+        },
+        {
+          "name": "batch_manager",
+          "type": "VHS_BatchManager",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 10,
+        "loop_count": 0,
+        "filename_prefix": "AnimateDiff",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_04025.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4"
+          }
+        }
+      }
+    },
+    {
+      "id": 26,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        2776,
+        793
+      ],
+      "size": [
+        458.43035888671875,
+        742.4303588867188
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 25
+        },
+        {
+          "name": "audio",
+          "type": "VHS_AUDIO",
+          "link": null
+        },
+        {
+          "name": "batch_manager",
+          "type": "VHS_BatchManager",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 10,
+        "loop_count": 0,
+        "filename_prefix": "AnimateDiff",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_04020.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4"
+          }
+        }
+      }
+    },
+    {
+      "id": 30,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        3278,
+        792
+      ],
+      "size": [
+        458.43035888671875,
+        742.4303588867188
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 30
+        },
+        {
+          "name": "audio",
+          "type": "VHS_AUDIO",
+          "link": null
+        },
+        {
+          "name": "batch_manager",
+          "type": "VHS_BatchManager",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 10,
+        "loop_count": 0,
+        "filename_prefix": "AnimateDiff",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_04021.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4"
+          }
+        }
+      }
+    },
+    {
+      "id": 34,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        3779,
+        780
+      ],
+      "size": [
+        458.43035888671875,
+        742.4303588867188
+      ],
+      "flags": {},
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 33
+        },
+        {
+          "name": "audio",
+          "type": "VHS_AUDIO",
+          "link": null
+        },
+        {
+          "name": "batch_manager",
+          "type": "VHS_BatchManager",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": [],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 10,
+        "loop_count": 0,
+        "filename_prefix": "AnimateDiff",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_04022.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4"
+          }
+        }
+      }
+    },
+    {
+      "id": 43,
+      "type": "SetNode",
+      "pos": [
+        1676,
+        707
+      ],
+      "size": {
+        "0": 210,
+        "1": 58
+      },
+      "flags": {
+        "collapsed": true
+      },
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "LORAINFO",
+          "type": "LORAINFO",
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LORAINFO",
+          "type": "LORAINFO",
+          "links": [
+            57
+          ]
+        }
+      ],
+      "title": "Set_lora_info",
+      "properties": {
+        "previousName": "lora_info"
+      },
+      "widgets_values": [
+        "lora_info"
       ]
     }
   ],
@@ -2163,14 +2044,6 @@
       "IMAGE"
     ],
     [
-      27,
-      13,
-      0,
-      24,
-      1,
-      "ADMDPIPELINE"
-    ],
-    [
       28,
       31,
       0,
@@ -2217,62 +2090,6 @@
       34,
       0,
       "IMAGE"
-    ],
-    [
-      34,
-      29,
-      0,
-      32,
-      1,
-      "ADMDPIPELINE"
-    ],
-    [
-      35,
-      25,
-      0,
-      28,
-      1,
-      "ADMDPIPELINE"
-    ],
-    [
-      37,
-      9,
-      0,
-      12,
-      1,
-      "ADMDPIPELINE"
-    ],
-    [
-      38,
-      8,
-      0,
-      39,
-      0,
-      "ADMDPIPELINE"
-    ],
-    [
-      39,
-      39,
-      0,
-      40,
-      0,
-      "*"
-    ],
-    [
-      40,
-      41,
-      0,
-      42,
-      0,
-      "*"
-    ],
-    [
-      41,
-      13,
-      0,
-      41,
-      0,
-      "ADMDPIPELINE"
     ],
     [
       42,
@@ -2283,90 +2100,114 @@
       "*"
     ],
     [
+      56,
+      9,
+      0,
+      54,
+      0,
+      "ADMDPIPELINE"
+    ],
+    [
+      57,
       43,
-      43,
       0,
-      39,
+      54,
       1,
       "LORAINFO"
     ],
     [
-      44,
-      44,
+      58,
+      54,
+      1,
+      12,
+      1,
+      "ADMDPIPELINE"
+    ],
+    [
+      59,
+      57,
       0,
-      41,
+      56,
       1,
       "LORAINFO"
     ],
     [
-      45,
-      47,
+      60,
+      59,
       0,
-      45,
+      58,
       1,
       "LORAINFO"
     ],
     [
-      46,
-      45,
+      61,
+      61,
       0,
-      46,
-      0,
-      "*"
-    ],
-    [
-      47,
-      50,
-      0,
-      48,
+      60,
       1,
       "LORAINFO"
     ],
     [
-      48,
-      48,
+      62,
+      63,
       0,
-      49,
-      0,
-      "*"
-    ],
-    [
-      49,
-      53,
-      0,
-      51,
+      62,
       1,
       "LORAINFO"
     ],
     [
-      50,
-      51,
+      63,
+      13,
       0,
-      52,
+      56,
       0,
-      "*"
+      "ADMDPIPELINE"
     ],
     [
-      51,
+      64,
+      56,
+      1,
       24,
-      0,
-      45,
-      0,
+      1,
       "ADMDPIPELINE"
     ],
     [
-      52,
+      65,
+      58,
+      1,
       28,
+      1,
+      "ADMDPIPELINE"
+    ],
+    [
+      66,
+      60,
+      1,
+      32,
+      1,
+      "ADMDPIPELINE"
+    ],
+    [
+      67,
+      25,
       0,
-      48,
+      58,
       0,
       "ADMDPIPELINE"
     ],
     [
-      53,
-      32,
+      68,
+      29,
       0,
-      51,
+      60,
+      0,
+      "ADMDPIPELINE"
+    ],
+    [
+      69,
+      33,
+      0,
+      62,
       0,
       "ADMDPIPELINE"
     ]
