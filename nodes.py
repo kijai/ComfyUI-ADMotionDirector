@@ -611,7 +611,7 @@ class ADMD_CheckpointLoader:
             unet = UNet3DConditionModel(**ad_unet_config)
             unet.load_state_dict(converted_unet, strict=False)
 
-            del dreambooth_state_dict
+            del dreambooth_state_dict, converted_unet, converted_vae
 
             # Validation pipeline
             validation_pipeline = AnimationPipeline(
@@ -960,7 +960,7 @@ class ADMD_TrainLora:
                         scaler.step(optimizer_temporal)
             
                         lr_scheduler_spatial_list[step].step()
-                        spatial_scheduler_lr = lr_scheduler_spatial_list[step].get_lr()[0]
+                        spatial_scheduler_lr = lr_scheduler_spatial_list[0].get_lr()[0]
                             
                         if lr_scheduler_temporal is not None:
                             lr_scheduler_temporal.step()
@@ -970,7 +970,7 @@ class ADMD_TrainLora:
                     progress_bar.update(1)
                     pbar.update(1)
                     global_step += 1
-                                                    
+                    torch.cuda.empty_cache()                                
                     logs = {
                         "Temporal Loss": loss_temporal.detach().item(),
                         "Temporal LR": temporal_scheduler_lr, 
