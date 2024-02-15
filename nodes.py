@@ -912,7 +912,9 @@ class ADMD_TrainLora:
 
                     # Add noise to the latents according to the noise magnitude at each timestep
                     # (this is the forward diffusion process)
+                    vae.to(device)
                     latents = tensor_to_vae_latent(pixel_values, vae)
+                    vae.cpu()
                     noise = sample_noise(latents, 0, use_offset_noise=use_offset_noise)
                     target = noise
 
