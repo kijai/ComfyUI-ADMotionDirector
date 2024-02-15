@@ -1,7 +1,9 @@
-# HEAVILY WORK IN PROGRESS
+# ComfyUI nodes to use AnimateDiff-MotionDirector
+
+![admd_example_workflow](https://github.com/kijai/ComfyUI-ADMotionDirector/assets/40791699/6d7b6ae4-da1c-4afd-a72c-a7642363c69a)
 
 Install 'pip install -r requirements.txt'
-For portable: 'python_embded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-ADMotionDirector\requirements.txt'
+For portable: 'python_embeded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-ADMotionDirector\requirements.txt'
 
 Tested with pytorch 2.1.1 + cu121 and 2.2.0 + cu121, older ones may have issues. 
 
