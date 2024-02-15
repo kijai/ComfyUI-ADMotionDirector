@@ -1,4 +1,4 @@
-#ComfyUI nodes to use AnimateDiff-MotionDirector
+# ComfyUI nodes to use AnimateDiff-MotionDirector
 
 ![admd_example_workflow](https://github.com/kijai/ComfyUI-ADMotionDirector/assets/40791699/6d7b6ae4-da1c-4afd-a72c-a7642363c69a)
 
