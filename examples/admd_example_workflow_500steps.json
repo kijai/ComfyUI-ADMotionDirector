@@ -1,6 +1,6 @@
 {
-  "last_node_id": 63,
-  "last_link_id": 69,
+  "last_node_id": 64,
+  "last_link_id": 70,
   "nodes": [
     {
       "id": 2,
@@ -226,7 +226,7 @@
       ],
       "size": [
         315,
-        525.25
+        290
       ],
       "flags": {},
       "order": 21,
@@ -694,7 +694,7 @@
       ],
       "size": [
         235.1999969482422,
-        399.4666646321615
+        242
       ],
       "flags": {},
       "order": 10,
@@ -983,7 +983,7 @@
       ],
       "size": [
         440.5592956542969,
-        619.4194717407227
+        290
       ],
       "flags": {},
       "order": 26,
@@ -1343,10 +1343,10 @@
         2956,
         665
       ],
-      "size": [
-        228.39999389648438,
-        46
-      ],
+      "size": {
+        "0": 228.39999389648438,
+        "1": 46
+      },
       "flags": {},
       "order": 33,
       "mode": 0,
@@ -1391,10 +1391,10 @@
         2448,
         679
       ],
-      "size": [
-        228.39999389648438,
-        46
-      ],
+      "size": {
+        "0": 228.39999389648438,
+        "1": 46
+      },
       "flags": {},
       "order": 29,
       "mode": 0,
@@ -1439,10 +1439,10 @@
         1965,
         657
       ],
-      "size": [
-        228.39999389648438,
-        46
-      ],
+      "size": {
+        "0": 228.39999389648438,
+        "1": 46
+      },
       "flags": {},
       "order": 25,
       "mode": 0,
@@ -1487,10 +1487,10 @@
         3462,
         666
       ],
-      "size": [
-        228.39999389648438,
-        46
-      ],
+      "size": {
+        "0": 228.39999389648438,
+        "1": 46
+      },
       "flags": {},
       "order": 37,
       "mode": 0,
@@ -1520,52 +1520,6 @@
           "links": [
             66
           ],
-          "shape": 3,
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_SaveLora"
-      }
-    },
-    {
-      "id": 62,
-      "type": "ADMD_SaveLora",
-      "pos": [
-        3957,
-        670
-      ],
-      "size": [
-        228.39999389648438,
-        46
-      ],
-      "flags": {},
-      "order": 41,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 69
-        },
-        {
-          "name": "lora_info",
-          "type": "LORAINFO",
-          "link": 62,
-          "slot_index": 1
-        }
-      ],
-      "outputs": [
-        {
-          "name": "lora_path",
-          "type": "STRING",
-          "links": null,
-          "shape": 3
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [],
           "shape": 3,
           "slot_index": 1
         }
@@ -1614,7 +1568,7 @@
       ],
       "size": [
         443.03863525390625,
-        621.2789764404297
+        290
       ],
       "flags": {},
       "order": 30,
@@ -1679,7 +1633,7 @@
       ],
       "size": [
         458.43035888671875,
-        742.4303588867188
+        290
       ],
       "flags": {},
       "order": 34,
@@ -1744,7 +1698,7 @@
       ],
       "size": [
         458.43035888671875,
-        742.4303588867188
+        290
       ],
       "flags": {},
       "order": 38,
@@ -1809,7 +1763,7 @@
       ],
       "size": [
         458.43035888671875,
-        742.4303588867188
+        290
       ],
       "flags": {},
       "order": 42,
@@ -1903,6 +1857,84 @@
       },
       "widgets_values": [
         "lora_info"
+      ]
+    },
+    {
+      "id": 62,
+      "type": "ADMD_SaveLora",
+      "pos": [
+        3957,
+        670
+      ],
+      "size": {
+        "0": 228.39999389648438,
+        "1": 46
+      },
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 69
+        },
+        {
+          "name": "lora_info",
+          "type": "LORAINFO",
+          "link": 62,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lora_path",
+          "type": "STRING",
+          "links": [
+            70
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_SaveLora"
+      }
+    },
+    {
+      "id": 64,
+      "type": "Display Any (rgthree)",
+      "pos": [
+        4325,
+        661
+      ],
+      "size": {
+        "0": 210,
+        "1": 76.00001525878906
+      },
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 70,
+          "dir": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Display Any (rgthree)"
+      },
+      "widgets_values": [
+        ""
       ]
     }
   ],
@@ -2210,6 +2242,14 @@
       62,
       0,
       "ADMDPIPELINE"
+    ],
+    [
+      70,
+      62,
+      0,
+      64,
+      0,
+      "*"
     ]
   ],
   "groups": [],
