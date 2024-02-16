@@ -6,9 +6,6 @@ https://github.com/kijai/ComfyUI-ADMotionDirector/assets/40791699/b082cbb0-4ba8-
 
 Install 'pip install -r requirements.txt'
 
-https://github.com/kijai/ComfyUI-ADMotionDirector/assets/40791699/b082cbb0-4ba8-4ee6-9a2a-48123dca41ef
-
-
 For portable: 'python_embeded\python.exe -m pip install -r ComfyUI\custom_nodes\ComfyUI-ADMotionDirector\requirements.txt'
 
 Tested with pytorch 2.1.1 + cu121 and 2.2.0 + cu121, older ones may have issues. 
