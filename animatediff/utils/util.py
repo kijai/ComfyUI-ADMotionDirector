@@ -108,7 +108,13 @@ def load_weights(
     unet_state_dict = {}
     if motion_module_path != "":
         print(f"load motion module from {motion_module_path}")
-        motion_module_state_dict = torch.load(motion_module_path, map_location="cpu")
+        if motion_module_path.endswith(".safetensors"):
+            motion_module_state_dict = {}
+            with safe_open(motion_module_path, framework="pt", device="cpu") as f:
+                for key in f.keys():
+                    motion_module_state_dict[key] = f.get_tensor(key)
+        elif motion_module_path.endswith(".ckpt"):
+            motion_module_state_dict = torch.load(motion_module_path, map_location="cpu")  
         motion_module_state_dict = motion_module_state_dict["state_dict"] if "state_dict" in motion_module_state_dict else motion_module_state_dict
         unet_state_dict.update({name: param for name, param in motion_module_state_dict.items() if "motion_modules." in name})
         unet_state_dict.pop("animatediff_config", "")
