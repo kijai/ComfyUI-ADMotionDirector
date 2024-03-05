@@ -494,6 +494,8 @@ class ADMD_DiffusersLoader:
             #xformers
             if use_xformers:
                 unet.enable_xformers_memory_efficient_attention()
+            else:
+                unet.disable_xformers_memory_efficient_attention()
 
             # Enable gradient checkpointing
             unet.enable_gradient_checkpointing()
@@ -673,9 +675,12 @@ class ADMD_AdditionalModelSelect:
     def select_models(self, motion_module, use_adapter_lora, optional_adapter_lora=""):
         additional_models = []
         motion_module_path = folder_paths.get_full_path("animatediff_models", motion_module)
-
+        if not Path(motion_module_path).is_file():
+            raise ValueError(f"Motion model {motion_module_path} does not exist")
         if use_adapter_lora:
             adapter_lora_path = folder_paths.get_full_path("loras", optional_adapter_lora)
+            if not Path(adapter_lora_path).is_file():
+                raise ValueError(f"Adapter LoRA path {adapter_lora_path} does not exist")
         else:
             adapter_lora_path = ""        
 
