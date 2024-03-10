@@ -893,6 +893,11 @@ class ADMD_TrainLora:
                 ).input_ids.to(device)
                 encoder_hidden_states = text_encoder(prompt_ids)[0]
 
+                pixel_values = pixel_values.to(device)
+                vae.to(device)
+                latents = tensor_to_vae_latent(pixel_values, vae)
+                vae.cpu()
+
             ### <<<< Training <<<< ###
             for epoch in range(first_epoch, num_train_epochs):                
                 for step in range(batch_size):
@@ -909,17 +914,12 @@ class ADMD_TrainLora:
                     mask_spatial_lora = random.uniform(0, 1) < 0.2
                     #mask_spatial_lora = 0
 
-                    pixel_values = pixel_values.to(device)      
-
                     # Sample a random timestep for each video
                     timesteps = torch.randint(0, 1000, (1,), device=pixel_values.device)
                     timesteps = timesteps.long()
 
                     # Add noise to the latents according to the noise magnitude at each timestep
-                    # (this is the forward diffusion process)
-                    vae.to(device)
-                    latents = tensor_to_vae_latent(pixel_values, vae)
-                    vae.cpu()
+                    # (this is the forward diffusion process)                    
                     noise = sample_noise(latents, 0, use_offset_noise=use_offset_noise)
                     target = noise
 
