@@ -30,6 +30,14 @@ import comfy.model_management
 import comfy.utils
 import folder_paths
 
+try:
+    import xformers
+    import xformers.ops
+
+    XFORMERS_IS_AVAILABLE = True
+except:
+    XFORMERS_IS_AVAILABLE = False
+
 script_directory = os.path.dirname(os.path.abspath(__file__))
 folder_paths.add_model_folder_path("animatediff_models", str(Path(__file__).parent.parent / "models"))
 folder_paths.add_model_folder_path("animatediff_models", str(Path(folder_paths.models_dir) / "animatediff_models"))
@@ -492,10 +500,11 @@ class ADMD_DiffusersLoader:
             text_encoder.requires_grad_(False)
 
             #xformers
-            if use_xformers:
-                unet.enable_xformers_memory_efficient_attention()
-            else:
-                unet.disable_xformers_memory_efficient_attention()
+            if XFORMERS_IS_AVAILABLE:
+                if use_xformers:
+                    unet.enable_xformers_memory_efficient_attention()
+                else:
+                    unet.disable_xformers_memory_efficient_attention()
 
             # Enable gradient checkpointing
             unet.enable_gradient_checkpointing()
@@ -625,10 +634,11 @@ class ADMD_CheckpointLoader:
             text_encoder.requires_grad_(False)
 
             #xformers
-            if use_xformers:
-                unet.enable_xformers_memory_efficient_attention()
-            else:
-                unet.disable_xformers_memory_efficient_attention()
+            if XFORMERS_IS_AVAILABLE:
+                if use_xformers:
+                    unet.enable_xformers_memory_efficient_attention()
+                else:
+                    unet.disable_xformers_memory_efficient_attention()
 
             # Enable gradient checkpointing
             unet.enable_gradient_checkpointing()
