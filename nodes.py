@@ -627,6 +627,8 @@ class ADMD_CheckpointLoader:
             #xformers
             if use_xformers:
                 unet.enable_xformers_memory_efficient_attention()
+            else:
+                unet.disable_xformers_memory_efficient_attention()
 
             # Enable gradient checkpointing
             unet.enable_gradient_checkpointing()
@@ -891,12 +893,16 @@ class ADMD_TrainLora:
                     truncation=True, 
                     return_tensors="pt"
                 ).input_ids.to(device)
+
+                #text encoding
+                text_encoder.to(device)
                 encoder_hidden_states = text_encoder(prompt_ids)[0]
+                text_encoder.to('cpu')
 
                 pixel_values = pixel_values.to(device)
-                vae.to(device)
+
                 latents = tensor_to_vae_latent(pixel_values, vae)
-                vae.cpu()
+                vae.to('cpu')
 
             ### <<<< Training <<<< ###
             for epoch in range(first_epoch, num_train_epochs):                
@@ -919,8 +925,10 @@ class ADMD_TrainLora:
                     timesteps = timesteps.long()
 
                     # Add noise to the latents according to the noise magnitude at each timestep
-                    # (this is the forward diffusion process)                    
+                    # (this is the forward diffusion process)
+                                      
                     noise = sample_noise(latents, 0, use_offset_noise=use_offset_noise)
+                    comfy.model_management.soft_empty_cache()
                     target = noise
 
                     with torch.cuda.amp.autocast():
@@ -973,11 +981,10 @@ class ADMD_TrainLora:
                             lr_scheduler_temporal.step()
                             temporal_scheduler_lr = lr_scheduler_temporal.get_lr()[0]
                 
-                    scaler.update()  
+                    scaler.update()
                     progress_bar.update(1)
                     pbar.update(1)
                     global_step += 1
-                    torch.cuda.empty_cache()                                
                     logs = {
                         "Temporal Loss": loss_temporal.detach().item(),
                         "Temporal LR": temporal_scheduler_lr, 
@@ -994,7 +1001,7 @@ class ADMD_TrainLora:
                 "unet": unet,
                 "scaler": scaler,
             })
-                
+            comfy.model_management.soft_empty_cache()
             return (admd_pipeline,)
 
 
