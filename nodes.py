@@ -51,19 +51,65 @@ def create_save_paths(output_dir: str):
     for directory in directories:
         os.makedirs(directory, exist_ok=True)
 
+def resize_and_pad_images(images, output_size):
+    images = images.permute(0, 3, 1, 2)
+    
+    # Calculate aspect ratio of the output size
+    aspect_ratio = output_size[1] / output_size[0]
+    
+    # Calculate resizing size that maintains aspect ratio
+    batch_size, channels, height, width = images.size()
+    if width / height > aspect_ratio:
+        # If image is wider than desired aspect ratio, fit to width
+        resize_width = output_size[1]
+        resize_height = round(resize_width / width * height)
+    else:
+        # If image is taller than desired aspect ratio, fit to height
+        resize_height = output_size[0]
+        resize_width = round(resize_height / height * width)
+    
+    # Resize the images while maintaining the aspect ratio
+    resized_images = F.interpolate(images, size=(resize_height, resize_width), mode='bilinear', align_corners=False)
+
+    # Calculate the padding required to make the images the same size
+    pad_width = max(0, output_size[1] - resized_images.size(3))
+    pad_height = max(0, output_size[0] - resized_images.size(2))
+    pad_left = pad_width // 2
+    pad_right = pad_width - pad_left
+    pad_top = pad_height // 2
+    pad_bottom = pad_height - pad_top
+
+    # Pad the images to the desired size with black bars
+    padded_images = F.pad(resized_images, (pad_left, pad_right, pad_top, pad_bottom), value=0)
+
+    return padded_images
+
 def do_sanity_check(
-    pixel_values: torch.Tensor,  
-    output_dir: str = "",
-    text_prompt: str = ""
+    sanity_check,  
+    output_dir,
+    text_prompt
 ):
-    pixel_values, texts = pixel_values.cpu(), text_prompt  
-    pixel_values = rearrange(pixel_values, "b f c h w -> b c f h w")
-    for idx, (pixel_value, text) in enumerate(zip(pixel_values, texts)):
+    if isinstance(sanity_check, list):
+        resized_images = []
+        for image in sanity_check:
+            image = resize_and_pad_images(image, (512, 512))
+            resized_images.append(image)
+        sanity_check = torch.cat(resized_images, dim=0)
+        sanity_check = sanity_check.unsqueeze(0)
+        
+    else:
+        sanity_check = sanity_check.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
+    sanity_check = sanity_check * 2.0 - 1.0 #normalize to the expected range (-1, 1)
+    
+
+    sanity_check, texts = sanity_check.cpu(), text_prompt  
+    sanity_check = rearrange(sanity_check, "b f c h w -> b c f h w")
+    for idx, (pixel_value, text) in enumerate(zip(sanity_check, texts)):
         pixel_value = pixel_value[None, ...]
         text = text
         save_name = f"{'-'.join(text.replace('/', '').split()[:10]) if not text == '' else f'-{idx}'}.mp4"
         save_videos_grid(pixel_value, f"{output_dir}/sanity_check/{save_name}", rescale=False)
-    return(pixel_values)
+    return(sanity_check)
 
 def sample_noise(latents, noise_strength, use_offset_noise=False):
     b, c, f, *_ = latents.shape
@@ -232,10 +278,6 @@ class ADMD_InitializeTraining:
             vae = pipeline["vae"]
             tokenizer = pipeline["tokenizer"]
 
-            images = images * 2.0 - 1.0 #normalize to the expected range (-1, 1)
-            pixel_values = images.clone()
-            pixel_values = pixel_values.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
-
             torch.manual_seed(seed)
 
             text_prompt = []
@@ -379,20 +421,22 @@ class ADMD_InitializeTraining:
             "text_encoder": text_encoder,
             "vae": vae,
             "tokenizer": tokenizer,
-            "pixel_values": pixel_values,
+            "pixel_values": images,
             "train_noise_scheduler": train_noise_scheduler,
             "train_noise_scheduler_spatial": train_noise_scheduler_spatial,
             "validation_pipeline": validation_pipeline,
             "global_step": 0,
+            "max_train_steps": max_train_steps,
             "scaler": scaler,
-            "include_resnet": include_resnet
+            "include_resnet": include_resnet,
+            "seed": seed
         }
         #Data batch sanity check
         
         sanitycheck = do_sanity_check(
-            pixel_values,  
-            output_dir=output_dir, 
-            text_prompt=text_prompt
+                images,  
+                output_dir=output_dir, 
+                text_prompt=text_prompt
         )
  
         sanitycheck = sanitycheck.view(*sanitycheck.shape[1:])
@@ -857,9 +901,11 @@ class ADMD_TrainLora:
             text_prompt = admd_pipeline["text_prompt"]
             pixel_values = admd_pipeline["pixel_values"]
             scaler = admd_pipeline["scaler"]
-
+            seed = admd_pipeline["seed"]
             include_resnet = admd_pipeline["include_resnet"]
             use_offset_noise = False
+
+            torch.manual_seed(seed)
 
             device = comfy.model_management.get_torch_device()
             comfy.model_management.unload_all_models()
@@ -879,21 +925,12 @@ class ADMD_TrainLora:
                 target_spatial_modules = ["Transformer3DModel"]
 
             target_temporal_modules = ["TemporalTransformerBlock"]
-
-            batch_size = 1
+      
             first_epoch = 0
             gradient_accumulation_steps = 1
             global_step = admd_pipeline["global_step"]
             print(f"global_step: {global_step}")
-            max_train_steps = steps
             
-            num_update_steps_per_epoch = math.ceil(batch_size) / gradient_accumulation_steps
-            num_train_epochs = math.ceil(max_train_steps / num_update_steps_per_epoch)
-
-            # Only show the progress bar once on each machine.
-            progress_bar = tqdm(range(global_step, max_train_steps))
-            progress_bar.set_description("Steps")
-            pbar = comfy.utils.ProgressBar(batch_size * num_train_epochs)
             
             # Get the text embedding for conditioning
             with torch.no_grad():
@@ -909,106 +946,142 @@ class ADMD_TrainLora:
                 text_encoder.to(device)
                 encoder_hidden_states = text_encoder(prompt_ids)[0]
                 text_encoder.to('cpu')
-                if opt_images_override is not None:
-                    opt_images_override = opt_images_override * 2.0 - 1.0 #normalize to the expected range (-1, 1)
-                    pixel_values = opt_images_override.clone()
-                    pixel_values = pixel_values.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
-                pixel_values = pixel_values.to(device)
 
-                latents = tensor_to_vae_latent(pixel_values, vae)
+                pixel_list = []
+                latent_list = []
+
+                if opt_images_override is not None:
+                    pixel_values = opt_images_override
+
+                if isinstance(pixel_values, list):
+                    print(f"Received {len(pixel_values)} batches:")
+                    for p in pixel_values:
+                        print("input batch shape:", p.shape)
+                        p = p * 2.0 - 1.0 #normalize to the expected range (-1, 1)
+                        p = p.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
+                        p = p.to(device)
+                        pixel_list.append(p)
+                        latent_list.append(tensor_to_vae_latent(p, vae))
+                        batch_size = len(pixel_list)
+                else:
+                    print("Received a single batch")
+                    print("input batch shape:", pixel_values.shape)
+                    pixel_values = pixel_values * 2.0 - 1.0 #normalize to the expected range (-1, 1)
+                    pixel_values = pixel_values.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
+                    pixel_values = pixel_values.to(device)
+                    latents = tensor_to_vae_latent(pixel_values, vae)
+                    pixel_list.append(pixel_values)
+                    latent_list.append(latents)
+                    batch_size = 1
+
+                
+                print("batch_size:", batch_size)
                 vae.to('cpu')
 
+                #num_update_steps_per_epoch = math.ceil(batch_size) / gradient_accumulation_steps
+                #num_train_epochs = math.ceil(max_train_steps / num_update_steps_per_epoch)
+
+                progress_bar = tqdm(range(0, steps))
+                progress_bar.set_description("Steps")
+                pbar = comfy.utils.ProgressBar(steps)
+
+            import itertools
+            pixel_cycle = itertools.cycle(pixel_list)
+            latent_cycle = itertools.cycle(latent_list)
             ### <<<< Training <<<< ###
-            for epoch in range(first_epoch, num_train_epochs):                
-                for step in range(batch_size):
-                    spatial_scheduler_lr = 0.0
-                    temporal_scheduler_lr = 0.0
+            #for epoch in range(first_epoch, steps):
+            for step in range(steps):
+                pixel_values = next(pixel_cycle)
+                latents = next(latent_cycle)
+                spatial_scheduler_lr = 0.0
+                temporal_scheduler_lr = 0.0
 
-                    # Handle Lora Optimizers & Conditions
-                    for optimizer_spatial in optimizer_spatial_list:
-                        optimizer_spatial.zero_grad(set_to_none=True)
+                # Handle Lora Optimizers & Conditions
+                for optimizer_spatial in optimizer_spatial_list:
+                    optimizer_spatial.zero_grad(set_to_none=True)
 
-                    if optimizer_temporal is not None:
-                        optimizer_temporal.zero_grad(set_to_none=True)
-        
-                    mask_spatial_lora = random.uniform(0, 1) < 0.2
-                    #mask_spatial_lora = 0
+                if optimizer_temporal is not None:
+                    optimizer_temporal.zero_grad(set_to_none=True)
+    
+                mask_spatial_lora = random.uniform(0, 1) < 0.2
+                #mask_spatial_lora = 0
 
-                    # Sample a random timestep for each video
-                    timesteps = torch.randint(0, 1000, (1,), device=pixel_values.device)
-                    timesteps = timesteps.long()
+                # Sample a random timestep for each video
+                timesteps = torch.randint(0, 1000, (1,), device=pixel_values.device)
+                timesteps = timesteps.long()
 
-                    # Add noise to the latents according to the noise magnitude at each timestep
-                    # (this is the forward diffusion process)
-                                      
-                    noise = sample_noise(latents, 0, use_offset_noise=use_offset_noise)
-                    comfy.model_management.soft_empty_cache()
-                    target = noise
+                # Add noise to the latents according to the noise magnitude at each timestep
+                # (this is the forward diffusion process)
+                                    
+                noise = sample_noise(latents, 0, use_offset_noise=use_offset_noise)
+                comfy.model_management.soft_empty_cache()
+                target = noise
 
-                    with torch.cuda.amp.autocast():
-                        if mask_spatial_lora:
-                            loras = extract_lora_child_module(unet, target_replace_module=target_spatial_modules)
-                            scale_loras(loras, 0.)
-                            loss_spatial = None
-                        else:
-                            loras = extract_lora_child_module(unet, target_replace_module=target_spatial_modules)
-                            scale_loras(loras, 1.0)
-
-                            loras = extract_lora_child_module(unet, target_replace_module=target_temporal_modules)
-                            if len(loras) > 0:
-                                scale_loras(loras, 0.)
-                            
-                            ### >>>> Spatial LoRA Prediction >>>> ###
-                            noisy_latents = train_noise_scheduler_spatial.add_noise(latents, noise, timesteps)
-                            noisy_latents_input, target_spatial = get_spatial_latents(
-                                pixel_values,  
-                                noisy_latents,
-                                target,
-                            )
-                            model_pred_spatial = unet(noisy_latents_input.unsqueeze(2), timesteps,
-                                                    encoder_hidden_states=encoder_hidden_states).sample
-                            loss_spatial = F.mse_loss(model_pred_spatial[:, :, 0, :, :].float(),
-                                                    target_spatial.float(), reduction="mean")
-                            
-                        loras = extract_lora_child_module(unet, target_replace_module=target_temporal_modules)
+                with torch.cuda.amp.autocast():
+                    if mask_spatial_lora:
+                        loras = extract_lora_child_module(unet, target_replace_module=target_spatial_modules)
+                        scale_loras(loras, 0.)
+                        loss_spatial = None
+                    else:
+                        loras = extract_lora_child_module(unet, target_replace_module=target_spatial_modules)
                         scale_loras(loras, 1.0)
-                        
-                        ### >>>> Temporal LoRA Prediction >>>> ###
-                        noisy_latents = train_noise_scheduler.add_noise(latents, noise, timesteps)
-                        model_pred = unet(noisy_latents, timesteps, encoder_hidden_states=encoder_hidden_states).sample
-                        
-                        loss_temporal = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
-                        loss_temporal = create_ad_temporal_loss(model_pred, loss_temporal, target)
-                            
-                        # Backpropagate
-                        if not mask_spatial_lora:
-                            scaler.scale(loss_spatial).backward(retain_graph=True)
-                            scaler.step(optimizer_spatial_list[0])
-                                            
-                        scaler.scale(loss_temporal).backward()
-                        scaler.step(optimizer_temporal)
-            
-                        lr_scheduler_spatial_list[step].step()
-                        spatial_scheduler_lr = lr_scheduler_spatial_list[0].get_lr()[0]
-                            
-                        if lr_scheduler_temporal is not None:
-                            lr_scheduler_temporal.step()
-                            temporal_scheduler_lr = lr_scheduler_temporal.get_lr()[0]
-                
-                    scaler.update()
-                    progress_bar.update(1)
-                    pbar.update(1)
-                    global_step += 1
-                    logs = {
-                        "Temporal Loss": loss_temporal.detach().item(),
-                        "Temporal LR": temporal_scheduler_lr, 
-                        "Spatial Loss": loss_spatial.detach().item() if loss_spatial is not None else 0,
-                        "Spatial LR": spatial_scheduler_lr
-                    }
-                    progress_bar.set_postfix(**logs)
 
-                    if global_step >= max_train_steps:
-                        break
+                        loras = extract_lora_child_module(unet, target_replace_module=target_temporal_modules)
+                        if len(loras) > 0:
+                            scale_loras(loras, 0.)
+                        
+                        ### >>>> Spatial LoRA Prediction >>>> ###
+                        noisy_latents = train_noise_scheduler_spatial.add_noise(latents, noise, timesteps)
+                        noisy_latents_input, target_spatial = get_spatial_latents(
+                            pixel_values,  
+                            noisy_latents,
+                            target,
+                        )
+                        model_pred_spatial = unet(noisy_latents_input.unsqueeze(2), timesteps,
+                                                encoder_hidden_states=encoder_hidden_states).sample
+                        loss_spatial = F.mse_loss(model_pred_spatial[:, :, 0, :, :].float(),
+                                                target_spatial.float(), reduction="mean")
+                        
+                    loras = extract_lora_child_module(unet, target_replace_module=target_temporal_modules)
+                    scale_loras(loras, 1.0)
+                    
+                    ### >>>> Temporal LoRA Prediction >>>> ###
+                    noisy_latents = train_noise_scheduler.add_noise(latents, noise, timesteps)
+                    model_pred = unet(noisy_latents, timesteps, encoder_hidden_states=encoder_hidden_states).sample
+                    
+                    loss_temporal = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
+                    loss_temporal = create_ad_temporal_loss(model_pred, loss_temporal, target)
+                        
+                    # Backpropagate
+                    if not mask_spatial_lora:
+                        scaler.scale(loss_spatial).backward(retain_graph=True)
+                        scaler.step(optimizer_spatial_list[0])
+                                        
+                    scaler.scale(loss_temporal).backward()
+                    scaler.step(optimizer_temporal)
+        
+                    lr_scheduler_spatial_list[0].step()
+                    spatial_scheduler_lr = lr_scheduler_spatial_list[0].get_lr()[0]
+                        
+                    if lr_scheduler_temporal is not None:
+                        lr_scheduler_temporal.step()
+                        temporal_scheduler_lr = lr_scheduler_temporal.get_lr()[0]
+            
+                scaler.update()
+                progress_bar.update(1)
+                pbar.update(1)
+                global_step += 1
+                logs = {
+                    "Temporal Loss": loss_temporal.detach().item(),
+                    "Temporal LR": temporal_scheduler_lr, 
+                    "Spatial Loss": loss_spatial.detach().item() if loss_spatial is not None else 0,
+                    "Spatial LR": spatial_scheduler_lr
+                }
+                progress_bar.set_postfix(**logs)
+
+                # if global_step >= steps:
+                #     print("BREAK")
+                #     break
 
             admd_pipeline.update({
                 "global_step": global_step,
@@ -1046,8 +1119,10 @@ class ADMD_ValidationSampler:
             validation_pipeline = admd_pipeline['validation_pipeline']
           
             device = comfy.model_management.get_torch_device()
-
-            video_length, input_height, input_width = pixel_values.shape[1], pixel_values.shape[3], pixel_values.shape[4]
+            if isinstance(pixel_values, list):
+                B, H, W, C = pixel_values[0].shape
+            else:
+                B, H, W, C = pixel_values.shape
 
             unet.to(device)
             vae.to(device)
@@ -1082,9 +1157,9 @@ class ADMD_ValidationSampler:
                         sample = validation_pipeline(
                             prompt,
                             generator    = generator,
-                            video_length = video_length,
-                            height       = input_height,
-                            width        = input_width,
+                            video_length = B,
+                            height       = H,
+                            width        = W,
                             num_inference_steps = validation_inference_steps,
                             guidance_scale = validation_guidance_scale,
                         ).videos
@@ -1094,6 +1169,37 @@ class ADMD_ValidationSampler:
                 samples = samples.view(*samples.shape[1:])
                 samples = samples.permute(1, 2, 3, 0).cpu() 
                 return (admd_pipeline, samples,)
+            
+class ADMD_MakeBatchList:
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images": ("IMAGE", ),
+                "images2": ("IMAGE", ),
+            },
+        }
+    
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image_batch_list",)
+    CATEGORY = "AD_MotionDirector"
+    FUNCTION = "batchlist"
+
+    def batchlist(self, images, images2):
+        batch_list = []
+        
+        if isinstance(images, list):
+            batch_list.extend(images)
+        else:
+            batch_list.append(images)
+
+        if isinstance(images2, list):
+            batch_list.extend(images2)
+        else:
+            batch_list.append(images2)
+        
+        return (batch_list,)
 
 NODE_CLASS_MAPPINGS = {
     "ADMD_InitializeTraining": ADMD_InitializeTraining,
@@ -1104,7 +1210,8 @@ NODE_CLASS_MAPPINGS = {
     "ADMD_SaveLora": ADMD_SaveLora,
     "ADMD_TrainLora": ADMD_TrainLora,
     "ADMD_CheckpointLoader": ADMD_CheckpointLoader,
-    "ADMD_ValidationSampler": ADMD_ValidationSampler
+    "ADMD_ValidationSampler": ADMD_ValidationSampler,
+    "ADMD_MakeBatchList": ADMD_MakeBatchList
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "ADMD_InitializeTraining": "ADMD_InitializeTraining",
@@ -1115,5 +1222,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ADMD_SaveLora": "ADMD_SaveLora",
     "ADMD_TrainLora": "ADMD_TrainLora",
     "ADMD_CheckpointLoader": "ADMD_CheckpointLoader",
-    "ADMD_ValidationSampler": "ADMD_ValidationSampler"
+    "ADMD_ValidationSampler": "ADMD_ValidationSampler",
+    "ADMD_MakeBatchList": "ADMD_MakeBatchList"
 }
