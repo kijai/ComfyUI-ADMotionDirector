@@ -833,6 +833,7 @@ class ADMD_TrainLora:
             },
             "optional": {
                 "trigger_input": ("VHS_FILENAMES", ), #attempt to force comfy execution order
+                "opt_images_override": ("IMAGE", ),
             }
         }
     
@@ -841,7 +842,7 @@ class ADMD_TrainLora:
     CATEGORY = "AD_MotionDirector"
     FUNCTION = "train"
 
-    def train(self, admd_pipeline, steps, trigger_input=None):
+    def train(self, admd_pipeline, steps, opt_images_override=None, trigger_input=None):
         with torch.inference_mode(False):
             train_noise_scheduler = admd_pipeline["train_noise_scheduler"]
             train_noise_scheduler_spatial = admd_pipeline["train_noise_scheduler_spatial"]
@@ -908,7 +909,10 @@ class ADMD_TrainLora:
                 text_encoder.to(device)
                 encoder_hidden_states = text_encoder(prompt_ids)[0]
                 text_encoder.to('cpu')
-
+                if opt_images_override is not None:
+                    opt_images_override = opt_images_override * 2.0 - 1.0 #normalize to the expected range (-1, 1)
+                    pixel_values = opt_images_override.clone()
+                    pixel_values = pixel_values.permute(0, 3, 1, 2).unsqueeze(0)#B,H,W,C to B,F,C,H,W
                 pixel_values = pixel_values.to(device)
 
                 latents = tensor_to_vae_latent(pixel_values, vae)
