@@ -709,7 +709,139 @@ class ADMD_CheckpointLoader:
             }
 
             return (pipeline,)
+        
+class ADMD_ComfyModelLoader:
+    @classmethod
+    def IS_CHANGED(s):
+        return ""
+    @classmethod
+    def INPUT_TYPES(cls):
 
+        return {"required":
+                {
+                "model" :("MODEL",),
+                "clip": ("CLIP",),
+                "vae": ("VAE",),
+                "motion_model":("MOTION_MODEL_ADE",),
+                "scheduler": (
+            [   
+                'DDIMScheduler',
+                'DDPMScheduler',
+            ], {
+               "default": 'DDIMScheduler'
+            }),
+            "use_xformers": ("BOOLEAN", {"default": False}),
+                },                
+            }
+    RETURN_TYPES = ("PIPELINE",)
+
+    FUNCTION = "load_checkpoint"
+
+    CATEGORY = "AD_MotionDirector"
+
+    def load_checkpoint(self, model, clip, vae, scheduler, use_xformers, motion_model):
+        with torch.inference_mode(False):
+            print(motion_model)
+            pbar = comfy.utils.ProgressBar(4)
+            original_config = OmegaConf.load(os.path.join(script_directory, f"configs/v1-inference.yaml"))
+            ad_unet_config = OmegaConf.load(os.path.join(script_directory, f"configs/ad_unet_config.yaml"))
+
+            from diffusers.loaders.single_file_utils import (convert_ldm_vae_checkpoint, convert_ldm_unet_checkpoint, create_text_encoder_from_ldm_clip_checkpoint, create_vae_diffusers_config, create_unet_diffusers_config)
+
+            tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
+
+            clip_sd = None
+            load_models = [model]
+            load_models.append(clip.load_model())
+            clip_sd = clip.get_sd()
+            
+            comfy.model_management.load_models_gpu(load_models)
+            sd = model.model.state_dict_for_saving(clip_sd, vae.get_sd(), None)
+     
+            text_encoder = create_text_encoder_from_ldm_clip_checkpoint("openai/clip-vit-large-patch14",sd)
+            pbar.update(1)
+            noise_scheduler_kwargs = {
+                'num_train_timesteps': 1000,
+                'beta_start':    0.00085,
+                'beta_end':      0.012,
+                'beta_schedule': "linear",
+                'clip_sample':   False,
+                'steps_offset': 1
+            }
+            #Determine the scheduler class based on the scheduler variable
+            SchedulerClass = DDPMScheduler if scheduler == "DDPMScheduler" else DDIMScheduler
+            print(f"using {SchedulerClass.__name__} for training")
+
+            # Set the beta_schedule and create the default noise scheduler
+            noise_scheduler_kwargs['beta_schedule'] = 'linear'
+            noise_scheduler = SchedulerClass(**noise_scheduler_kwargs)
+
+            # Set the beta_schedule for the spatial noise scheduler and create it
+            noise_scheduler_kwargs['beta_schedule'] = 'scaled_linear'
+            train_noise_scheduler_spatial = SchedulerClass(**noise_scheduler_kwargs)
+
+            # Reset the beta_schedule for the linear noise scheduler and create it
+            noise_scheduler_kwargs['beta_schedule'] = 'linear'
+            train_noise_scheduler = SchedulerClass(**noise_scheduler_kwargs)
+
+            # 1. vae
+            converted_vae_config = create_vae_diffusers_config(original_config, image_size=512)
+            converted_vae = convert_ldm_vae_checkpoint(sd, converted_vae_config)
+            vae = AutoencoderKL(**converted_vae_config)
+            vae.load_state_dict(converted_vae, strict=False)
+            pbar.update(1)
+            # 2. unet
+            converted_unet_config = create_unet_diffusers_config(original_config, image_size=512)
+            converted_unet = convert_ldm_unet_checkpoint(sd, converted_unet_config)
+            unet = UNet3DConditionModel(**ad_unet_config)
+            unet.load_state_dict(converted_unet, strict=False)
+            
+            del sd, converted_unet, converted_vae
+
+            pbar.update(1)
+
+            # Validation pipeline
+            validation_pipeline = AnimationPipeline(
+                unet=unet, vae=vae, tokenizer=tokenizer, text_encoder=text_encoder, scheduler=noise_scheduler,
+            )
+            # Freeze all models for LoRA training
+            unet.requires_grad_(False)
+            vae.requires_grad_(False)
+            text_encoder.requires_grad_(False)
+
+            #xformers
+            if XFORMERS_IS_AVAILABLE:
+                if use_xformers:
+                    unet.enable_xformers_memory_efficient_attention()
+                else:
+                    unet.disable_xformers_memory_efficient_attention()
+
+            # Enable gradient checkpointing
+            unet.enable_gradient_checkpointing()
+
+            domain_adapter_path = ""
+
+            validation_pipeline = load_weights(
+                validation_pipeline, 
+                motion_module_path=motion_model,
+                adapter_lora_path=domain_adapter_path, 
+                dreambooth_model_path=""
+            )
+            pbar.update(1)
+            validation_pipeline.enable_vae_slicing()         
+
+            pipeline = {
+                'validation_pipeline': validation_pipeline,
+                'train_noise_scheduler': train_noise_scheduler,
+                'train_noise_scheduler_spatial': train_noise_scheduler_spatial,
+                'unet': unet,
+                'vae': vae,
+                'text_encoder': text_encoder,
+                'tokenizer': tokenizer
+            }
+
+            return (pipeline,)
+        
 class ADMD_AdditionalModelSelect:
     @classmethod
     def INPUT_TYPES(s):
@@ -1211,7 +1343,8 @@ NODE_CLASS_MAPPINGS = {
     "ADMD_TrainLora": ADMD_TrainLora,
     "ADMD_CheckpointLoader": ADMD_CheckpointLoader,
     "ADMD_ValidationSampler": ADMD_ValidationSampler,
-    "ADMD_MakeBatchList": ADMD_MakeBatchList
+    "ADMD_MakeBatchList": ADMD_MakeBatchList,
+    "ADMD_ComfyModelLoader": ADMD_ComfyModelLoader
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "ADMD_InitializeTraining": "ADMD_InitializeTraining",
@@ -1223,5 +1356,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ADMD_TrainLora": "ADMD_TrainLora",
     "ADMD_CheckpointLoader": "ADMD_CheckpointLoader",
     "ADMD_ValidationSampler": "ADMD_ValidationSampler",
-    "ADMD_MakeBatchList": "ADMD_MakeBatchList"
+    "ADMD_MakeBatchList": "ADMD_MakeBatchList",
+    "ADMD_ComfyModelLoader": "ADMD_ComfyModelLoader"
 }
