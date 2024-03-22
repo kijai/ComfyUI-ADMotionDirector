@@ -558,11 +558,11 @@ class ADMD_DiffusersLoader:
                 unet=unet, vae=vae, tokenizer=tokenizer, text_encoder=text_encoder, scheduler=noise_scheduler,
             ).to(device)
 
-            motion_module_path, domain_adapter_path = additional_models 
+            motion_model, domain_adapter_path = additional_models 
 
             validation_pipeline = load_weights(
                 validation_pipeline, 
-                motion_module_path=motion_module_path,
+                motion_model=motion_model,
                 adapter_lora_path=domain_adapter_path, 
                 dreambooth_model_path=""
             )
@@ -687,11 +687,11 @@ class ADMD_CheckpointLoader:
             # Enable gradient checkpointing
             unet.enable_gradient_checkpointing()
 
-            motion_module_path, domain_adapter_path = additional_models 
+            motion_model, domain_adapter_path = additional_models 
 
             validation_pipeline = load_weights(
                 validation_pipeline, 
-                motion_module_path=motion_module_path,
+                motion_model=motion_model,
                 adapter_lora_path=domain_adapter_path, 
                 dreambooth_model_path=""
             )
@@ -741,7 +741,7 @@ class ADMD_ComfyModelLoader:
 
     def load_checkpoint(self, model, clip, vae, scheduler, use_xformers, motion_model):
         with torch.inference_mode(False):
-            print(motion_model)
+        
             pbar = comfy.utils.ProgressBar(4)
             original_config = OmegaConf.load(os.path.join(script_directory, f"configs/v1-inference.yaml"))
             ad_unet_config = OmegaConf.load(os.path.join(script_directory, f"configs/ad_unet_config.yaml"))
@@ -823,7 +823,7 @@ class ADMD_ComfyModelLoader:
 
             validation_pipeline = load_weights(
                 validation_pipeline, 
-                motion_module_path=motion_model,
+                motion_model=motion_model,
                 adapter_lora_path=domain_adapter_path, 
                 dreambooth_model_path=""
             )
@@ -862,9 +862,9 @@ class ADMD_AdditionalModelSelect:
 
     def select_models(self, motion_module, use_adapter_lora, optional_adapter_lora=""):
         additional_models = []
-        motion_module_path = folder_paths.get_full_path("animatediff_models", motion_module)
-        if not Path(motion_module_path).is_file():
-            raise ValueError(f"Motion model {motion_module_path} does not exist")
+        motion_model = folder_paths.get_full_path("animatediff_models", motion_module)
+        if not Path(motion_model).is_file():
+            raise ValueError(f"Motion model {motion_model} does not exist")
         if use_adapter_lora:
             adapter_lora_path = folder_paths.get_full_path("loras", optional_adapter_lora)
             if not Path(adapter_lora_path).is_file():
@@ -872,7 +872,7 @@ class ADMD_AdditionalModelSelect:
         else:
             adapter_lora_path = ""        
 
-        additional_models.append(motion_module_path)
+        additional_models.append(motion_model)
         additional_models.append(adapter_lora_path)  
         return (additional_models,)
 

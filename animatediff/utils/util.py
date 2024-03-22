@@ -94,7 +94,7 @@ def ddim_inversion(pipeline, ddim_scheduler, video_latent, num_inv_steps, prompt
 def load_weights(
     animation_pipeline,
     # motion module
-    motion_module_path         = "",
+    motion_model         = "",
     motion_module_lora_configs = [],
     # domain adapter
     adapter_lora_path          = "",
@@ -106,20 +106,24 @@ def load_weights(
 ):
     # motion module
     unet_state_dict = {}
-    if isinstance(motion_module_path, str) and motion_module_path != "":
-        print(f"load motion module from {motion_module_path}")
-        if motion_module_path.endswith(".safetensors"):
+    if isinstance(motion_model, str) and motion_model != "":
+        print(f"load motion module from {motion_model}")
+        if motion_model.endswith(".safetensors"):
             motion_module_state_dict = {}
-            with safe_open(motion_module_path, framework="pt", device="cpu") as f:
+            with safe_open(motion_model, framework="pt", device="cpu") as f:
                 for key in f.keys():
                     motion_module_state_dict[key] = f.get_tensor(key)
-        elif motion_module_path.endswith(".ckpt"):
-            motion_module_state_dict = torch.load(motion_module_path, map_location="cpu")  
+        elif motion_model.endswith(".ckpt"):
+            motion_module_state_dict = torch.load(motion_model, map_location="cpu")  
         motion_module_state_dict = motion_module_state_dict["state_dict"] if "state_dict" in motion_module_state_dict else motion_module_state_dict
         unet_state_dict.update({name: param for name, param in motion_module_state_dict.items() if "motion_modules." in name})
         unet_state_dict.pop("animatediff_config", "")
     else:
-        motion_module_state_dict = motion_module_path.model.state_dict()
+        unet_state_dict = {}
+        motion_module_state_dict = motion_model.model.state_dict()
+        if motion_model.model.mm_info.mm_format == "AnimateLCM":
+            motion_module_state_dict = {k: v for k, v in motion_module_state_dict.items() if "pos_encoder" not in k}
+        
         unet_state_dict.update({name: param for name, param in motion_module_state_dict.items() if "motion_modules." in name})
         unet_state_dict.pop("animatediff_config", "")
 
