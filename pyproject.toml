@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-admotiondirector"
+description = "This is a trainer for AnimateDiff MotionLoRAs, based on the implementation of MotionDirector by ExponentialML."
+version = "1.0.0"
+license = "LICENSE"
+dependencies = ["diffusers==0.26.2", "huggingface_hub>=0.20.3", "transformers==4.37.2", "loralib", "einops", "omegaconf", "lion-pytorch", "peft", "imageio>=2.33.1", "imageio-ffmpeg>=0.4.7"]
+
+[project.urls]
+Repository = "https://github.com/kijai/ComfyUI-ADMotionDirector"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-ADMotionDirector"
+Icon = ""
