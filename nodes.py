@@ -746,7 +746,7 @@ class ADMD_ComfyModelLoader:
             original_config = OmegaConf.load(os.path.join(script_directory, f"configs/v1-inference.yaml"))
             ad_unet_config = OmegaConf.load(os.path.join(script_directory, f"configs/ad_unet_config.yaml"))
 
-            from diffusers.loaders.single_file_utils import (convert_ldm_vae_checkpoint, convert_ldm_unet_checkpoint, create_text_encoder_from_ldm_clip_checkpoint, create_vae_diffusers_config, create_unet_diffusers_config)
+            from .single_file_utils import (convert_ldm_vae_checkpoint, convert_ldm_unet_checkpoint, create_text_encoder_from_ldm_clip_checkpoint, create_vae_diffusers_config, create_unet_diffusers_config)
 
             tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
 
