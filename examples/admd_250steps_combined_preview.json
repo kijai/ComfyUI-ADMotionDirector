@@ -1,152 +1,23 @@
 {
   "last_node_id": 98,
-  "last_link_id": 120,
+  "last_link_id": 125,
   "nodes": [
     {
-      "id": 2,
-      "type": "ADMD_AdditionalModelSelect",
-      "pos": [
-        363,
-        430
-      ],
+      "id": 18,
+      "type": "Note",
+      "pos": {
+        "0": 765,
+        "1": 608
+      },
       "size": {
-        "0": 373.4171447753906,
-        "1": 106
+        "0": 295.9085998535156,
+        "1": 87.45726776123047
       },
       "flags": {},
       "order": 0,
       "mode": 0,
-      "outputs": [
-        {
-          "name": "additional_models",
-          "type": "ADDITIONAL_MODELS",
-          "links": [
-            1
-          ],
-          "shape": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_AdditionalModelSelect"
-      },
-      "widgets_values": [
-        "v3_sd15_mm.ckpt",
-        true,
-        "1_5/v3_sd15_adapter.ckpt"
-      ]
-    },
-    {
-      "id": 16,
-      "type": "Display Int (rgthree)",
-      "pos": [
-        759,
-        959
-      ],
-      "size": {
-        "0": 315,
-        "1": 76
-      },
-      "flags": {},
-      "order": 25,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "input",
-          "type": "INT",
-          "link": 19,
-          "widget": {
-            "name": "input"
-          },
-          "dir": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "Display Int (rgthree)"
-      },
-      "widgets_values": [
-        0,
-        "16"
-      ]
-    },
-    {
-      "id": 17,
-      "type": "Note",
-      "pos": [
-        770,
-        1094
-      ],
-      "size": {
-        "0": 295.9085998535156,
-        "1": 87.45726776123047
-      },
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "properties": {
-        "text": ""
-      },
-      "widgets_values": [
-        "Only tested with 16 frame inputs!"
-      ],
-      "color": "#432",
-      "bgcolor": "#653"
-    },
-    {
-      "id": 1,
-      "type": "ADMD_CheckpointLoader",
-      "pos": [
-        771,
-        433
-      ],
-      "size": {
-        "0": 330,
-        "1": 106
-      },
-      "flags": {},
-      "order": 23,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "additional_models",
-          "type": "ADDITIONAL_MODELS",
-          "link": 1,
-          "slot_index": 0
-        }
-      ],
-      "outputs": [
-        {
-          "name": "PIPELINE",
-          "type": "PIPELINE",
-          "links": [
-            3
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_CheckpointLoader"
-      },
-      "widgets_values": [
-        "1_5/dreamshaper_8.safetensors",
-        "DDIMScheduler",
-        false
-      ]
-    },
-    {
-      "id": 18,
-      "type": "Note",
-      "pos": [
-        765,
-        608
-      ],
-      "size": {
-        "0": 295.9085998535156,
-        "1": 87.45726776123047
-      },
-      "flags": {},
-      "order": 2,
-      "mode": 0,
+      "inputs": [],
+      "outputs": [],
       "properties": {
         "text": ""
       },
@@ -159,16 +30,16 @@
     {
       "id": 7,
       "type": "VHS_VideoCombine",
-      "pos": [
-        1288,
-        809
-      ],
+      "pos": {
+        "0": 1288,
+        "1": 809
+      },
       "size": [
         315,
-        697.3333333333333
+        717.3333333333333
       ],
       "flags": {},
-      "order": 33,
+      "order": 35,
       "mode": 0,
       "inputs": [
         {
@@ -178,13 +49,21 @@
         },
         {
           "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
+          "type": "AUDIO",
+          "link": null,
+          "shape": 7
         },
         {
-          "name": "batch_manager",
+          "name": "meta_batch",
           "type": "VHS_BatchManager",
-          "link": null
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -212,10 +91,11 @@
           "hidden": false,
           "paused": false,
           "params": {
-            "filename": "AnimateDiff_01071.mp4",
+            "filename": "AnimateDiff_00333.mp4",
             "subfolder": "",
             "type": "output",
-            "format": "video/h264-mp4"
+            "format": "video/h264-mp4",
+            "frame_rate": 10
           }
         }
       }
@@ -223,10 +103,10 @@
     {
       "id": 31,
       "type": "GetNode",
-      "pos": [
-        3280,
-        360
-      ],
+      "pos": {
+        "0": 3280,
+        "1": 360
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -234,8 +114,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 4,
+      "order": 1,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "VALIDATION_SETTINGS",
@@ -254,10 +135,10 @@
     {
       "id": 27,
       "type": "GetNode",
-      "pos": [
-        2800,
-        360
-      ],
+      "pos": {
+        "0": 2800,
+        "1": 360
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -265,8 +146,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 5,
+      "order": 2,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "VALIDATION_SETTINGS",
@@ -285,10 +167,10 @@
     {
       "id": 23,
       "type": "GetNode",
-      "pos": [
-        2290,
-        350
-      ],
+      "pos": {
+        "0": 2290,
+        "1": 350
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -296,8 +178,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 6,
+      "order": 3,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "VALIDATION_SETTINGS",
@@ -316,10 +199,10 @@
     {
       "id": 35,
       "type": "GetNode",
-      "pos": [
-        3780,
-        380
-      ],
+      "pos": {
+        "0": 3780,
+        "1": 380
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -327,8 +210,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 7,
+      "order": 4,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "VALIDATION_SETTINGS",
@@ -347,10 +231,10 @@
     {
       "id": 22,
       "type": "GetNode",
-      "pos": [
-        1770,
-        350
-      ],
+      "pos": {
+        "0": 1770,
+        "1": 350
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -358,8 +242,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 8,
+      "order": 5,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "VALIDATION_SETTINGS",
@@ -376,124 +261,18 @@
       ]
     },
     {
-      "id": 28,
-      "type": "ADMD_TrainLora",
-      "pos": [
-        3300,
-        430
-      ],
-      "size": {
-        "0": 342.5999755859375,
-        "1": 78
-      },
-      "flags": {},
-      "order": 59,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "trigger_input",
-          "type": "VHS_FILENAMES",
-          "link": null,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 65
-        },
-        {
-          "name": "steps",
-          "type": "INT",
-          "link": 81,
-          "widget": {
-            "name": "steps"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            29
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_TrainLora"
-      },
-      "widgets_values": [
-        100
-      ]
-    },
-    {
-      "id": 32,
-      "type": "ADMD_TrainLora",
-      "pos": [
-        3780,
-        430
-      ],
-      "size": {
-        "0": 342.5999755859375,
-        "1": 78
-      },
-      "flags": {},
-      "order": 65,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "trigger_input",
-          "type": "VHS_FILENAMES",
-          "link": null,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 66
-        },
-        {
-          "name": "steps",
-          "type": "INT",
-          "link": 82,
-          "widget": {
-            "name": "steps"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            32
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_TrainLora"
-      },
-      "widgets_values": [
-        100
-      ]
-    },
-    {
       "id": 11,
       "type": "VHS_VideoCombine",
-      "pos": [
-        1785,
-        782
-      ],
+      "pos": {
+        "0": 1785,
+        "1": 782
+      },
       "size": [
         440.5592956542969,
-        864.7457275390625
+        884.7457275390625
       ],
       "flags": {},
-      "order": 43,
+      "order": 45,
       "mode": 0,
       "inputs": [
         {
@@ -503,13 +282,21 @@
         },
         {
           "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
+          "type": "AUDIO",
+          "link": null,
+          "shape": 7
         },
         {
-          "name": "batch_manager",
+          "name": "meta_batch",
           "type": "VHS_BatchManager",
-          "link": null
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -517,8 +304,8 @@
           "name": "Filenames",
           "type": "VHS_FILENAMES",
           "links": [],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -538,10 +325,11 @@
           "hidden": false,
           "paused": false,
           "params": {
-            "filename": "AnimateDiff_01072.mp4",
+            "filename": "AnimateDiff_00334.mp4",
             "subfolder": "",
             "type": "output",
-            "format": "video/h264-mp4"
+            "format": "video/h264-mp4",
+            "frame_rate": 10
           }
         }
       }
@@ -549,10 +337,10 @@
     {
       "id": 57,
       "type": "GetNode",
-      "pos": [
-        2272,
-        727
-      ],
+      "pos": {
+        "0": 2272,
+        "1": 727
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -560,8 +348,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 9,
+      "order": 6,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "LORAINFO",
@@ -580,10 +369,10 @@
     {
       "id": 61,
       "type": "GetNode",
-      "pos": [
-        3280,
-        710
-      ],
+      "pos": {
+        "0": 3280,
+        "1": 710
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -591,8 +380,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 10,
+      "order": 7,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "LORAINFO",
@@ -611,10 +401,10 @@
     {
       "id": 59,
       "type": "GetNode",
-      "pos": [
-        2799,
-        713
-      ],
+      "pos": {
+        "0": 2799,
+        "1": 713
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -622,8 +412,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 11,
+      "order": 8,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "LORAINFO",
@@ -642,10 +433,10 @@
     {
       "id": 58,
       "type": "ADMD_SaveLora",
-      "pos": [
-        2956,
-        665
-      ],
+      "pos": {
+        "0": 2956,
+        "1": 665
+      },
       "size": {
         "0": 228.39999389648438,
         "1": 46
@@ -677,23 +468,24 @@
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [
-            65
+            124
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_SaveLora"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 56,
       "type": "ADMD_SaveLora",
-      "pos": [
-        2448,
-        679
-      ],
+      "pos": {
+        "0": 2448,
+        "1": 679
+      },
       "size": {
         "0": 228.39999389648438,
         "1": 46
@@ -725,29 +517,30 @@
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [
-            64
+            123
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_SaveLora"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 54,
       "type": "ADMD_SaveLora",
-      "pos": [
-        1965,
-        657
-      ],
+      "pos": {
+        "0": 1965,
+        "1": 657
+      },
       "size": {
         "0": 228.39999389648438,
         "1": 46
       },
       "flags": {},
-      "order": 42,
+      "order": 44,
       "mode": 0,
       "inputs": [
         {
@@ -773,23 +566,24 @@
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [
-            58
+            122
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_SaveLora"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 60,
       "type": "ADMD_SaveLora",
-      "pos": [
-        3462,
-        666
-      ],
+      "pos": {
+        "0": 3462,
+        "1": 666
+      },
       "size": {
         "0": 228.39999389648438,
         "1": 46
@@ -821,23 +615,24 @@
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [
-            66
+            125
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_SaveLora"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 63,
       "type": "GetNode",
-      "pos": [
-        3777,
-        709
-      ],
+      "pos": {
+        "0": 3777,
+        "1": 709
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -845,8 +640,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 12,
+      "order": 9,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "LORAINFO",
@@ -865,13 +661,13 @@
     {
       "id": 14,
       "type": "VHS_VideoCombine",
-      "pos": [
-        2284,
-        788
-      ],
+      "pos": {
+        "0": 2284,
+        "1": 788
+      },
       "size": [
         443.03863525390625,
-        868.051513671875
+        310
       ],
       "flags": {},
       "order": 51,
@@ -884,13 +680,21 @@
         },
         {
           "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
+          "type": "AUDIO",
+          "link": null,
+          "shape": 7
         },
         {
-          "name": "batch_manager",
+          "name": "meta_batch",
           "type": "VHS_BatchManager",
-          "link": null
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -898,8 +702,8 @@
           "name": "Filenames",
           "type": "VHS_FILENAMES",
           "links": [],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -930,13 +734,13 @@
     {
       "id": 26,
       "type": "VHS_VideoCombine",
-      "pos": [
-        2776,
-        793
-      ],
+      "pos": {
+        "0": 2776,
+        "1": 793
+      },
       "size": [
         458.43035888671875,
-        888.5738118489584
+        310
       ],
       "flags": {},
       "order": 57,
@@ -949,13 +753,21 @@
         },
         {
           "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
+          "type": "AUDIO",
+          "link": null,
+          "shape": 7
         },
         {
-          "name": "batch_manager",
+          "name": "meta_batch",
           "type": "VHS_BatchManager",
-          "link": null
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -963,8 +775,8 @@
           "name": "Filenames",
           "type": "VHS_FILENAMES",
           "links": [],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -995,13 +807,13 @@
     {
       "id": 30,
       "type": "VHS_VideoCombine",
-      "pos": [
-        3278,
-        792
-      ],
+      "pos": {
+        "0": 3278,
+        "1": 792
+      },
       "size": [
         458.43035888671875,
-        888.5738118489584
+        310
       ],
       "flags": {},
       "order": 63,
@@ -1014,13 +826,21 @@
         },
         {
           "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
+          "type": "AUDIO",
+          "link": null,
+          "shape": 7
         },
         {
-          "name": "batch_manager",
+          "name": "meta_batch",
           "type": "VHS_BatchManager",
-          "link": null
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -1028,8 +848,8 @@
           "name": "Filenames",
           "type": "VHS_FILENAMES",
           "links": [],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -1060,10 +880,10 @@
     {
       "id": 43,
       "type": "SetNode",
-      "pos": [
-        1676,
-        707
-      ],
+      "pos": {
+        "0": 1676,
+        "1": 707
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -1071,7 +891,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 36,
+      "order": 38,
       "mode": 0,
       "inputs": [
         {
@@ -1100,10 +920,10 @@
     {
       "id": 64,
       "type": "Display Any (rgthree)",
-      "pos": [
-        4325,
-        661
-      ],
+      "pos": {
+        "0": 4325,
+        "1": 661
+      },
       "size": {
         "0": 210,
         "1": 76.00001525878906
@@ -1119,20 +939,21 @@
           "dir": 3
         }
       ],
+      "outputs": [],
       "properties": {
         "Node name for S&R": "Display Any (rgthree)"
       },
       "widgets_values": [
-        "\"2024-02-15/16-02-57/dragon_camera/250_dragon_camera_r64_temporal_unet.safetensors\""
+        ""
       ]
     },
     {
       "id": 62,
       "type": "ADMD_SaveLora",
-      "pos": [
-        3957,
-        670
-      ],
+      "pos": {
+        "0": 3957,
+        "1": 670
+      },
       "size": {
         "0": 228.39999389648438,
         "1": 46
@@ -1160,110 +981,37 @@
           "links": [
             70
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "admd_pipeline",
           "type": "ADMDPIPELINE",
           "links": [],
-          "shape": 3,
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_SaveLora"
-      }
-    },
-    {
-      "id": 5,
-      "type": "VHS_LoadVideo",
-      "pos": [
-        378,
-        676
-      ],
-      "size": [
-        235.1999969482422,
-        562.0622178819444
-      ],
-      "flags": {},
-      "order": 13,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "batch_manager",
-          "type": "VHS_BatchManager",
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            4
-          ],
-          "shape": 3,
-          "slot_index": 0
-        },
-        {
-          "name": "frame_count",
-          "type": "INT",
-          "links": [
-            19
-          ],
-          "shape": 3,
-          "slot_index": 1
-        },
-        {
-          "name": "audio",
-          "type": "VHS_AUDIO",
-          "links": null,
+          "slot_index": 1,
           "shape": 3
         }
       ],
       "properties": {
-        "Node name for S&R": "VHS_LoadVideo"
+        "Node name for S&R": "ADMD_SaveLora"
       },
-      "widgets_values": {
-        "video": "dragon_normals0001-0600.mp4",
-        "force_rate": 0,
-        "force_size": "Disabled",
-        "custom_width": 512,
-        "custom_height": 512,
-        "frame_load_cap": 16,
-        "skip_first_frames": 0,
-        "select_every_nth": 3,
-        "choose video to upload": "image",
-        "videopreview": {
-          "hidden": false,
-          "paused": false,
-          "params": {
-            "frame_load_cap": 16,
-            "skip_first_frames": 0,
-            "force_rate": 0,
-            "filename": "dragon_normals0001-0600.mp4",
-            "type": "input",
-            "format": "video/mp4",
-            "select_every_nth": 3
-          }
-        }
-      }
+      "widgets_values": []
     },
     {
       "id": 15,
       "type": "ADMD_ValidationSettings",
-      "pos": [
-        350,
-        -290
-      ],
+      "pos": {
+        "0": 350,
+        "1": -290
+      },
       "size": {
         "0": 391.4627990722656,
         "1": 234.64732360839844
       },
       "flags": {},
-      "order": 14,
+      "order": 10,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "validation_settings",
@@ -1271,15 +1019,15 @@
           "links": [
             20
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_ValidationSettings"
       },
       "widgets_values": [
-        573564136339632,
+        368258939526964,
         "randomize",
         25,
         8,
@@ -1288,74 +1036,21 @@
       ]
     },
     {
-      "id": 6,
-      "type": "ImageResize+",
-      "pos": [
-        757,
-        739
-      ],
-      "size": {
-        "0": 315,
-        "1": 194
-      },
-      "flags": {},
-      "order": 24,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 4
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            5
-          ],
-          "shape": 3,
-          "slot_index": 0
-        },
-        {
-          "name": "width",
-          "type": "INT",
-          "links": null,
-          "shape": 3
-        },
-        {
-          "name": "height",
-          "type": "INT",
-          "links": null,
-          "shape": 3
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ImageResize+"
-      },
-      "widgets_values": [
-        384,
-        512,
-        "nearest",
-        false,
-        "always"
-      ]
-    },
-    {
       "id": 19,
       "type": "Note",
-      "pos": [
-        1258,
-        214
-      ],
+      "pos": {
+        "0": 1258,
+        "1": 214
+      },
       "size": {
         "0": 360.4319152832031,
         "1": 87.27517700195312
       },
       "flags": {},
-      "order": 15,
+      "order": 11,
       "mode": 0,
+      "inputs": [],
+      "outputs": [],
       "properties": {
         "text": ""
       },
@@ -1368,10 +1063,10 @@
     {
       "id": 66,
       "type": "SetNode",
-      "pos": [
-        1494,
-        383
-      ],
+      "pos": {
+        "0": 1494,
+        "1": 383
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -1379,7 +1074,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 34,
+      "order": 36,
       "mode": 0,
       "inputs": [
         {
@@ -1408,16 +1103,16 @@
     {
       "id": 9,
       "type": "ADMD_ValidationSampler",
-      "pos": [
-        1790,
-        560
-      ],
+      "pos": {
+        "0": 1790,
+        "1": 560
+      },
       "size": {
         "0": 418.1999816894531,
         "1": 46
       },
       "flags": {},
-      "order": 39,
+      "order": 41,
       "mode": 0,
       "inputs": [
         {
@@ -1439,8 +1134,8 @@
           "links": [
             56
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "images",
@@ -1449,181 +1144,22 @@
             10,
             76
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_ValidationSampler"
-      }
-    },
-    {
-      "id": 8,
-      "type": "ADMD_TrainLora",
-      "pos": [
-        1801,
-        430
-      ],
-      "size": {
-        "0": 342.5999755859375,
-        "1": 78
       },
-      "flags": {},
-      "order": 35,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "trigger_input",
-          "type": "VHS_FILENAMES",
-          "link": null,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 7
-        },
-        {
-          "name": "steps",
-          "type": "INT",
-          "link": 78,
-          "widget": {
-            "name": "steps"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            8
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_TrainLora"
-      },
-      "widgets_values": [
-        100
-      ]
-    },
-    {
-      "id": 12,
-      "type": "ADMD_TrainLora",
-      "pos": [
-        2280,
-        420
-      ],
-      "size": {
-        "0": 342.5999755859375,
-        "1": 78
-      },
-      "flags": {},
-      "order": 47,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "trigger_input",
-          "type": "VHS_FILENAMES",
-          "link": null,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 58
-        },
-        {
-          "name": "steps",
-          "type": "INT",
-          "link": 79,
-          "widget": {
-            "name": "steps"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            14
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_TrainLora"
-      },
-      "widgets_values": [
-        100
-      ]
-    },
-    {
-      "id": 24,
-      "type": "ADMD_TrainLora",
-      "pos": [
-        2800,
-        430
-      ],
-      "size": {
-        "0": 342.5999755859375,
-        "1": 78
-      },
-      "flags": {},
-      "order": 53,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "trigger_input",
-          "type": "VHS_FILENAMES",
-          "link": null,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "link": 64,
-          "slot_index": 1
-        },
-        {
-          "name": "steps",
-          "type": "INT",
-          "link": 80,
-          "widget": {
-            "name": "steps"
-          }
-        }
-      ],
-      "outputs": [
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            24
-          ],
-          "shape": 3,
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_TrainLora"
-      },
-      "widgets_values": [
-        100
-      ]
+      "widgets_values": []
     },
     {
       "id": 67,
       "type": "GetNode",
-      "pos": [
-        1150.6919365687493,
-        -804.8715327031244
-      ],
+      "pos": {
+        "0": 1150.69189453125,
+        "1": -804.8715209960938
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -1631,8 +1167,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 16,
+      "order": 12,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "IMAGE",
@@ -1654,16 +1191,16 @@
     {
       "id": 75,
       "type": "SomethingToString",
-      "pos": [
-        1810.53828646875,
-        -387.48689440312495
-      ],
+      "pos": {
+        "0": 1810.538330078125,
+        "1": -387.4869079589844
+      },
       "size": {
         "0": 210,
         "1": 82
       },
       "flags": {},
-      "order": 28,
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
@@ -1679,8 +1216,8 @@
           "links": [
             84
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -1694,16 +1231,16 @@
     {
       "id": 69,
       "type": "AddLabel",
-      "pos": [
-        1810.53828646875,
-        -837.4868944031244
-      ],
+      "pos": {
+        "0": 1810.538330078125,
+        "1": -837.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 250
+        "1": 270
       },
       "flags": {},
-      "order": 44,
+      "order": 46,
       "mode": 0,
       "inputs": [
         {
@@ -1727,8 +1264,8 @@
           "links": [
             77
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -1743,19 +1280,20 @@
         "black",
         "TTNorms-Black.otf",
         "100 steps",
-        "up"
+        "up",
+        ""
       ]
     },
     {
       "id": 80,
       "type": "AddLabel",
-      "pos": [
-        2380.538286468749,
-        -837.4868944031244
-      ],
+      "pos": {
+        "0": 2380.538330078125,
+        "1": -837.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 250
+        "1": 270
       },
       "flags": {},
       "order": 52,
@@ -1782,8 +1320,8 @@
           "links": [
             85
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -1798,22 +1336,23 @@
         "black",
         "TTNorms-Black.otf",
         "100 steps",
-        "up"
+        "up",
+        ""
       ]
     },
     {
       "id": 81,
       "type": "SomethingToString",
-      "pos": [
-        2380.538286468749,
-        -387.48689440312495
-      ],
+      "pos": {
+        "0": 2380.538330078125,
+        "1": -387.4869079589844
+      },
       "size": {
         "0": 210,
         "1": 82
       },
       "flags": {},
-      "order": 32,
+      "order": 31,
       "mode": 0,
       "inputs": [
         {
@@ -1829,8 +1368,8 @@
           "links": [
             86
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -1844,16 +1383,16 @@
     {
       "id": 84,
       "type": "SomethingToString",
-      "pos": [
-        2880.538286468749,
-        -387.48689440312495
-      ],
+      "pos": {
+        "0": 2880.538330078125,
+        "1": -387.4869079589844
+      },
       "size": {
         "0": 210,
         "1": 82
       },
       "flags": {},
-      "order": 38,
+      "order": 34,
       "mode": 0,
       "inputs": [
         {
@@ -1869,8 +1408,8 @@
           "links": [
             88
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -1884,13 +1423,13 @@
     {
       "id": 86,
       "type": "AddLabel",
-      "pos": [
-        3320.538286468749,
-        -857.4868944031244
-      ],
+      "pos": {
+        "0": 3320.538330078125,
+        "1": -857.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 250
+        "1": 270
       },
       "flags": {},
       "order": 64,
@@ -1917,8 +1456,8 @@
           "links": [
             89
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -1933,22 +1472,23 @@
         "black",
         "TTNorms-Black.otf",
         "100 steps",
-        "up"
+        "up",
+        ""
       ]
     },
     {
       "id": 87,
       "type": "SomethingToString",
-      "pos": [
-        3320.538286468749,
-        -407.486894403125
-      ],
+      "pos": {
+        "0": 3320.538330078125,
+        "1": -407.4869079589844
+      },
       "size": {
         "0": 210,
         "1": 82
       },
       "flags": {},
-      "order": 40,
+      "order": 39,
       "mode": 0,
       "inputs": [
         {
@@ -1964,8 +1504,8 @@
           "links": [
             90
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -1979,16 +1519,16 @@
     {
       "id": 90,
       "type": "SomethingToString",
-      "pos": [
-        3820.538286468749,
-        -407.486894403125
-      ],
+      "pos": {
+        "0": 3820.538330078125,
+        "1": -407.4869079589844
+      },
       "size": {
         "0": 210,
         "1": 82
       },
       "flags": {},
-      "order": 45,
+      "order": 42,
       "mode": 0,
       "inputs": [
         {
@@ -2004,8 +1544,8 @@
           "links": [
             92
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -2019,13 +1559,13 @@
     {
       "id": 83,
       "type": "AddLabel",
-      "pos": [
-        2880.538286468749,
-        -837.4868944031244
-      ],
+      "pos": {
+        "0": 2880.538330078125,
+        "1": -837.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 250
+        "1": 270
       },
       "flags": {},
       "order": 58,
@@ -2052,8 +1592,8 @@
           "links": [
             87
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -2068,19 +1608,20 @@
         "black",
         "TTNorms-Black.otf",
         "100 steps",
-        "up"
+        "up",
+        ""
       ]
     },
     {
       "id": 65,
       "type": "ImageConcanate",
-      "pos": [
-        1810.53828646875,
-        -537.4868944031248
-      ],
+      "pos": {
+        "0": 1810.538330078125,
+        "1": -537.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 78
+        "1": 102
       },
       "flags": {},
       "order": 48,
@@ -2104,27 +1645,28 @@
           "links": [
             110
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ImageConcanate"
       },
       "widgets_values": [
-        "right"
+        "right",
+        true
       ]
     },
     {
       "id": 79,
       "type": "ImageConcanate",
-      "pos": [
-        2380.538286468749,
-        -537.4868944031248
-      ],
+      "pos": {
+        "0": 2380.538330078125,
+        "1": -537.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 78
+        "1": 102
       },
       "flags": {},
       "order": 54,
@@ -2148,27 +1690,28 @@
           "links": [
             111
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ImageConcanate"
       },
       "widgets_values": [
-        "right"
+        "right",
+        true
       ]
     },
     {
       "id": 82,
       "type": "ImageConcanate",
-      "pos": [
-        2880.538286468749,
-        -547.4868944031248
-      ],
+      "pos": {
+        "0": 2880.538330078125,
+        "1": -547.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 78
+        "1": 102
       },
       "flags": {},
       "order": 60,
@@ -2192,27 +1735,28 @@
           "links": [
             112
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ImageConcanate"
       },
       "widgets_values": [
-        "right"
+        "right",
+        true
       ]
     },
     {
       "id": 85,
       "type": "ImageConcanate",
-      "pos": [
-        3320.538286468749,
-        -557.4868944031247
-      ],
+      "pos": {
+        "0": 3320.538330078125,
+        "1": -557.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 78
+        "1": 102
       },
       "flags": {},
       "order": 66,
@@ -2236,27 +1780,28 @@
           "links": [
             113
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ImageConcanate"
       },
       "widgets_values": [
-        "right"
+        "right",
+        true
       ]
     },
     {
       "id": 34,
       "type": "VHS_VideoCombine",
-      "pos": [
-        3779,
-        780
-      ],
+      "pos": {
+        "0": 3779,
+        "1": 780
+      },
       "size": [
         458.43035888671875,
-        888.5738118489584
+        310
       ],
       "flags": {},
       "order": 69,
@@ -2269,13 +1814,21 @@
         },
         {
           "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
+          "type": "AUDIO",
+          "link": null,
+          "shape": 7
         },
         {
-          "name": "batch_manager",
+          "name": "meta_batch",
           "type": "VHS_BatchManager",
-          "link": null
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -2283,8 +1836,8 @@
           "name": "Filenames",
           "type": "VHS_FILENAMES",
           "links": [],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -2315,13 +1868,13 @@
     {
       "id": 88,
       "type": "ImageConcanate",
-      "pos": [
-        3820.538286468749,
-        -557.4868944031247
-      ],
+      "pos": {
+        "0": 3820.538330078125,
+        "1": -557.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 78
+        "1": 102
       },
       "flags": {},
       "order": 72,
@@ -2345,31 +1898,33 @@
           "links": [
             114
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ImageConcanate"
       },
       "widgets_values": [
-        "right"
+        "right",
+        true
       ]
     },
     {
       "id": 72,
       "type": "INTConstant",
-      "pos": [
-        2890,
-        80
-      ],
+      "pos": {
+        "0": 2890,
+        "1": 80
+      },
       "size": {
         "0": 210,
         "1": 58
       },
       "flags": {},
-      "order": 19,
+      "order": 13,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "value",
@@ -2378,8 +1933,8 @@
             80,
             100
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "title": "Steps",
@@ -2395,17 +1950,18 @@
     {
       "id": 73,
       "type": "INTConstant",
-      "pos": [
-        3370,
-        50
-      ],
+      "pos": {
+        "0": 3370,
+        "1": 50
+      },
       "size": {
         "0": 210,
         "1": 58
       },
       "flags": {},
-      "order": 20,
+      "order": 14,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "value",
@@ -2414,8 +1970,8 @@
             81,
             103
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "title": "Steps",
@@ -2431,17 +1987,18 @@
     {
       "id": 74,
       "type": "INTConstant",
-      "pos": [
-        3870,
-        40
-      ],
+      "pos": {
+        "0": 3870,
+        "1": 40
+      },
       "size": {
         "0": 210,
         "1": 58
       },
       "flags": {},
-      "order": 21,
+      "order": 15,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "value",
@@ -2450,8 +2007,8 @@
             82,
             108
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "title": "Steps",
@@ -2465,93 +2022,12 @@
       "bgcolor": "#29699c"
     },
     {
-      "id": 4,
-      "type": "ADMD_InitializeTraining",
-      "pos": [
-        1239,
-        429
-      ],
-      "size": [
-        400,
-        332
-      ],
-      "flags": {},
-      "order": 30,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "pipeline",
-          "type": "PIPELINE",
-          "link": 3
-        },
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 5
-        },
-        {
-          "name": "max_train_steps",
-          "type": "INT",
-          "link": 116,
-          "widget": {
-            "name": "max_train_steps"
-          },
-          "slot_index": 2
-        }
-      ],
-      "outputs": [
-        {
-          "name": "sanitycheck",
-          "type": "IMAGE",
-          "links": [
-            6,
-            71
-          ],
-          "shape": 3,
-          "slot_index": 0
-        },
-        {
-          "name": "admd_pipeline",
-          "type": "ADMDPIPELINE",
-          "links": [
-            7
-          ],
-          "shape": 3,
-          "slot_index": 1
-        },
-        {
-          "name": "lora_info",
-          "type": "LORAINFO",
-          "links": [
-            42
-          ],
-          "shape": 3,
-          "slot_index": 2
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "ADMD_InitializeTraining"
-      },
-      "widgets_values": [
-        "dragon_camera",
-        "high speed camera motion",
-        500,
-        0.0005,
-        0.0001,
-        64,
-        427886500570174,
-        "randomize",
-        "Lion",
-        true
-      ]
-    },
-    {
       "id": 98,
       "type": "GetNode",
-      "pos": [
-        1022,
-        350
-      ],
+      "pos": {
+        "0": 1022,
+        "1": 350
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -2559,8 +2035,9 @@
       "flags": {
         "collapsed": true
       },
-      "order": 22,
+      "order": 16,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "INT",
@@ -2581,10 +2058,10 @@
     {
       "id": 13,
       "type": "ADMD_ValidationSampler",
-      "pos": [
-        2280,
-        570
-      ],
+      "pos": {
+        "0": 2280,
+        "1": 570
+      },
       "size": {
         "0": 408.6878356933594,
         "1": 46.784175872802734
@@ -2612,8 +2089,8 @@
           "links": [
             63
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "images",
@@ -2622,21 +2099,22 @@
             16,
             117
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_ValidationSampler"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 25,
       "type": "ADMD_ValidationSampler",
-      "pos": [
-        2790,
-        570
-      ],
+      "pos": {
+        "0": 2790,
+        "1": 570
+      },
       "size": {
         "0": 408.6878356933594,
         "1": 46.784175872802734
@@ -2664,8 +2142,8 @@
           "links": [
             67
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "images",
@@ -2674,21 +2152,22 @@
             25,
             118
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_ValidationSampler"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 29,
       "type": "ADMD_ValidationSampler",
-      "pos": [
-        3290,
-        560
-      ],
+      "pos": {
+        "0": 3290,
+        "1": 560
+      },
       "size": {
         "0": 408.6878356933594,
         "1": 46.784175872802734
@@ -2716,8 +2195,8 @@
           "links": [
             68
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "images",
@@ -2726,21 +2205,22 @@
             30,
             119
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_ValidationSampler"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 33,
       "type": "ADMD_ValidationSampler",
-      "pos": [
-        3780,
-        560
-      ],
+      "pos": {
+        "0": 3780,
+        "1": 560
+      },
       "size": {
         "0": 408.6878356933594,
         "1": 46.784175872802734
@@ -2768,8 +2248,8 @@
           "links": [
             69
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "images",
@@ -2778,24 +2258,25 @@
             33,
             120
           ],
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
         "Node name for S&R": "ADMD_ValidationSampler"
-      }
+      },
+      "widgets_values": []
     },
     {
       "id": 89,
       "type": "AddLabel",
-      "pos": [
-        3820.538286468749,
-        -857.4868944031244
-      ],
+      "pos": {
+        "0": 3820.538330078125,
+        "1": -857.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 250
+        "1": 270
       },
       "flags": {},
       "order": 70,
@@ -2822,8 +2303,8 @@
           "links": [
             91
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -2838,22 +2319,23 @@
         "black",
         "TTNorms-Black.otf",
         "100 steps",
-        "up"
+        "up",
+        ""
       ]
     },
     {
       "id": 68,
       "type": "AddLabel",
-      "pos": [
-        1380.53828646875,
-        -834.4868944031244
-      ],
+      "pos": {
+        "0": 1380.538330078125,
+        "1": -834.4868774414062
+      },
       "size": {
         "0": 315,
-        "1": 250
+        "1": 274
       },
       "flags": {},
-      "order": 27,
+      "order": 24,
       "mode": 0,
       "inputs": [
         {
@@ -2869,8 +2351,8 @@
           "links": [
             74
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -2885,23 +2367,26 @@
         "black",
         "TTNorms-Black.otf",
         "input",
-        "up"
+        "up",
+        ""
       ]
     },
     {
       "id": 21,
       "type": "Note",
-      "pos": [
-        370,
-        -440
-      ],
+      "pos": {
+        "0": 370,
+        "1": -440
+      },
       "size": {
         "0": 360.4319152832031,
         "1": 87.27517700195312
       },
       "flags": {},
-      "order": 3,
+      "order": 17,
       "mode": 0,
+      "inputs": [],
+      "outputs": [],
       "properties": {
         "text": ""
       },
@@ -2914,10 +2399,10 @@
     {
       "id": 71,
       "type": "INTConstant",
-      "pos": [
-        2351,
-        89
-      ],
+      "pos": {
+        "0": 2351,
+        "1": 89
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -2925,6 +2410,7 @@
       "flags": {},
       "order": 18,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "value",
@@ -2933,8 +2419,8 @@
             79,
             97
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "title": "Steps",
@@ -2950,17 +2436,18 @@
     {
       "id": 70,
       "type": "INTConstant",
-      "pos": [
-        1838,
-        150
-      ],
+      "pos": {
+        "0": 1838,
+        "1": 150
+      },
       "size": {
         "0": 210,
         "1": 58
       },
       "flags": {},
-      "order": 17,
+      "order": 19,
       "mode": 0,
+      "inputs": [],
       "outputs": [
         {
           "name": "value",
@@ -2970,8 +2457,8 @@
             83,
             99
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "title": "Steps",
@@ -2987,30 +2474,38 @@
     {
       "id": 91,
       "type": "SimpleMath+",
-      "pos": [
-        2629,
-        177
-      ],
-      "size": [
-        210,
-        78
-      ],
+      "pos": {
+        "0": 2629,
+        "1": 177
+      },
+      "size": {
+        "0": 210,
+        "1": 98
+      },
       "flags": {
         "collapsed": true
       },
-      "order": 29,
+      "order": 26,
       "mode": 0,
       "inputs": [
         {
           "name": "a",
-          "type": "INT,FLOAT",
-          "link": 97
+          "type": "*",
+          "link": 97,
+          "shape": 7
         },
         {
           "name": "b",
-          "type": "INT,FLOAT",
+          "type": "*",
           "link": 99,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 7
+        },
+        {
+          "name": "c",
+          "type": "*",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -3021,8 +2516,8 @@
             101,
             107
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "FLOAT",
@@ -3041,30 +2536,38 @@
     {
       "id": 93,
       "type": "SimpleMath+",
-      "pos": [
-        3133,
-        172
-      ],
+      "pos": {
+        "0": 3133,
+        "1": 172
+      },
       "size": {
         "0": 210,
-        "1": 78
+        "1": 98
       },
       "flags": {
         "collapsed": true
       },
-      "order": 31,
+      "order": 30,
       "mode": 0,
       "inputs": [
         {
           "name": "a",
-          "type": "INT,FLOAT",
-          "link": 100
+          "type": "*",
+          "link": 100,
+          "shape": 7
         },
         {
           "name": "b",
-          "type": "INT,FLOAT",
+          "type": "*",
           "link": 101,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 7
+        },
+        {
+          "name": "c",
+          "type": "*",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -3075,8 +2578,8 @@
             102,
             106
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "FLOAT",
@@ -3095,30 +2598,38 @@
     {
       "id": 94,
       "type": "SimpleMath+",
-      "pos": [
-        3621,
-        169
-      ],
+      "pos": {
+        "0": 3621,
+        "1": 169
+      },
       "size": {
         "0": 210,
-        "1": 78
+        "1": 98
       },
       "flags": {
         "collapsed": true
       },
-      "order": 37,
+      "order": 33,
       "mode": 0,
       "inputs": [
         {
           "name": "a",
-          "type": "INT,FLOAT",
-          "link": 103
+          "type": "*",
+          "link": 103,
+          "shape": 7
         },
         {
           "name": "b",
-          "type": "INT,FLOAT",
+          "type": "*",
           "link": 102,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 7
+        },
+        {
+          "name": "c",
+          "type": "*",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -3129,15 +2640,15 @@
             105,
             109
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "FLOAT",
           "type": "FLOAT",
           "links": null,
-          "shape": 3,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 3
         }
       ],
       "properties": {
@@ -3150,30 +2661,38 @@
     {
       "id": 95,
       "type": "SimpleMath+",
-      "pos": [
-        4126,
-        167
-      ],
+      "pos": {
+        "0": 4126,
+        "1": 167
+      },
       "size": {
         "0": 210,
-        "1": 78
+        "1": 98
       },
       "flags": {
         "collapsed": true
       },
-      "order": 41,
+      "order": 40,
       "mode": 0,
       "inputs": [
         {
           "name": "a",
-          "type": "INT,FLOAT",
-          "link": 108
+          "type": "*",
+          "link": 108,
+          "shape": 7
         },
         {
           "name": "b",
-          "type": "INT,FLOAT",
+          "type": "*",
           "link": 109,
-          "slot_index": 1
+          "slot_index": 1,
+          "shape": 7
+        },
+        {
+          "name": "c",
+          "type": "*",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -3184,8 +2703,8 @@
             104,
             115
           ],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         },
         {
           "name": "FLOAT",
@@ -3204,10 +2723,10 @@
     {
       "id": 20,
       "type": "SetNode",
-      "pos": [
-        780,
-        -260
-      ],
+      "pos": {
+        "0": 780,
+        "1": -260
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -3215,7 +2734,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 26,
+      "order": 23,
       "mode": 0,
       "inputs": [
         {
@@ -3242,10 +2761,10 @@
     {
       "id": 97,
       "type": "SetNode",
-      "pos": [
-        4365,
-        169
-      ],
+      "pos": {
+        "0": 4365,
+        "1": 169
+      },
       "size": {
         "0": 210,
         "1": 58
@@ -3253,7 +2772,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 46,
+      "order": 43,
       "mode": 0,
       "inputs": [
         {
@@ -3282,13 +2801,13 @@
     {
       "id": 96,
       "type": "VHS_VideoCombine",
-      "pos": [
-        4589,
-        -1023
-      ],
+      "pos": {
+        "0": 4589,
+        "1": -1023
+      },
       "size": [
-        1666.1523391414485,
-        704.1064453125
+        1666.15234375,
+        310
       ],
       "flags": {},
       "order": 73,
@@ -3301,13 +2820,21 @@
         },
         {
           "name": "audio",
-          "type": "VHS_AUDIO",
-          "link": null
+          "type": "AUDIO",
+          "link": null,
+          "shape": 7
         },
         {
-          "name": "batch_manager",
+          "name": "meta_batch",
           "type": "VHS_BatchManager",
-          "link": null
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null,
+          "shape": 7
         }
       ],
       "outputs": [
@@ -3315,8 +2842,8 @@
           "name": "Filenames",
           "type": "VHS_FILENAMES",
           "links": [],
-          "shape": 3,
-          "slot_index": 0
+          "slot_index": 0,
+          "shape": 3
         }
       ],
       "properties": {
@@ -3343,6 +2870,666 @@
           }
         }
       }
+    },
+    {
+      "id": 8,
+      "type": "ADMD_TrainLora",
+      "pos": {
+        "0": 1801,
+        "1": 430
+      },
+      "size": {
+        "0": 342.5999755859375,
+        "1": 94
+      },
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 121,
+          "slot_index": 0
+        },
+        {
+          "name": "trigger_input",
+          "type": "VHS_FILENAMES",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "steps",
+          "type": "INT",
+          "link": 78,
+          "widget": {
+            "name": "steps"
+          }
+        },
+        {
+          "name": "opt_images_override",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            8
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_TrainLora"
+      },
+      "widgets_values": [
+        100
+      ]
+    },
+    {
+      "id": 12,
+      "type": "ADMD_TrainLora",
+      "pos": {
+        "0": 2280,
+        "1": 420
+      },
+      "size": {
+        "0": 342.5999755859375,
+        "1": 94
+      },
+      "flags": {},
+      "order": 47,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 122,
+          "slot_index": 0
+        },
+        {
+          "name": "trigger_input",
+          "type": "VHS_FILENAMES",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "steps",
+          "type": "INT",
+          "link": 79,
+          "widget": {
+            "name": "steps"
+          }
+        },
+        {
+          "name": "opt_images_override",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            14
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_TrainLora"
+      },
+      "widgets_values": [
+        100
+      ]
+    },
+    {
+      "id": 24,
+      "type": "ADMD_TrainLora",
+      "pos": {
+        "0": 2800,
+        "1": 430
+      },
+      "size": {
+        "0": 342.5999755859375,
+        "1": 94
+      },
+      "flags": {},
+      "order": 53,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 123,
+          "slot_index": 0
+        },
+        {
+          "name": "trigger_input",
+          "type": "VHS_FILENAMES",
+          "link": null,
+          "slot_index": 1,
+          "shape": 7
+        },
+        {
+          "name": "steps",
+          "type": "INT",
+          "link": 80,
+          "widget": {
+            "name": "steps"
+          }
+        },
+        {
+          "name": "opt_images_override",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            24
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_TrainLora"
+      },
+      "widgets_values": [
+        100
+      ]
+    },
+    {
+      "id": 28,
+      "type": "ADMD_TrainLora",
+      "pos": {
+        "0": 3300,
+        "1": 430
+      },
+      "size": {
+        "0": 342.5999755859375,
+        "1": 94
+      },
+      "flags": {},
+      "order": 59,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 124,
+          "slot_index": 0
+        },
+        {
+          "name": "trigger_input",
+          "type": "VHS_FILENAMES",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "steps",
+          "type": "INT",
+          "link": 81,
+          "widget": {
+            "name": "steps"
+          }
+        },
+        {
+          "name": "opt_images_override",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            29
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_TrainLora"
+      },
+      "widgets_values": [
+        100
+      ]
+    },
+    {
+      "id": 32,
+      "type": "ADMD_TrainLora",
+      "pos": {
+        "0": 3780,
+        "1": 430
+      },
+      "size": {
+        "0": 342.5999755859375,
+        "1": 94
+      },
+      "flags": {},
+      "order": 65,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "link": 125,
+          "slot_index": 0
+        },
+        {
+          "name": "trigger_input",
+          "type": "VHS_FILENAMES",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "steps",
+          "type": "INT",
+          "link": 82,
+          "widget": {
+            "name": "steps"
+          }
+        },
+        {
+          "name": "opt_images_override",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            32
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_TrainLora"
+      },
+      "widgets_values": [
+        100
+      ]
+    },
+    {
+      "id": 17,
+      "type": "Note",
+      "pos": {
+        "0": 768,
+        "1": 1132
+      },
+      "size": {
+        "0": 295.9085998535156,
+        "1": 87.45726776123047
+      },
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "text": ""
+      },
+      "widgets_values": [
+        "Only tested with 16 frame inputs!"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 16,
+      "type": "Display Int (rgthree)",
+      "pos": {
+        "0": 762,
+        "1": 1007
+      },
+      "size": {
+        "0": 315,
+        "1": 76
+      },
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "input",
+          "type": "INT",
+          "link": 19,
+          "widget": {
+            "name": "input"
+          },
+          "dir": 3
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Display Int (rgthree)"
+      },
+      "widgets_values": [
+        0,
+        ""
+      ]
+    },
+    {
+      "id": 1,
+      "type": "ADMD_CheckpointLoader",
+      "pos": {
+        "0": 771,
+        "1": 433
+      },
+      "size": {
+        "0": 330,
+        "1": 106
+      },
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "additional_models",
+          "type": "ADDITIONAL_MODELS",
+          "link": 1,
+          "slot_index": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "PIPELINE",
+          "type": "PIPELINE",
+          "links": [
+            3
+          ],
+          "slot_index": 0,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_CheckpointLoader"
+      },
+      "widgets_values": [
+        "1_5\\photon_v1.safetensors",
+        "DDIMScheduler",
+        false
+      ]
+    },
+    {
+      "id": 2,
+      "type": "ADMD_AdditionalModelSelect",
+      "pos": {
+        "0": 363,
+        "1": 430
+      },
+      "size": {
+        "0": 373.4171447753906,
+        "1": 106
+      },
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "additional_models",
+          "type": "ADDITIONAL_MODELS",
+          "links": [
+            1
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_AdditionalModelSelect"
+      },
+      "widgets_values": [
+        "v3_sd15_mm.ckpt",
+        true,
+        "1_5\\v3_sd15_adapter.ckpt"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "VHS_LoadVideo",
+      "pos": {
+        "0": 378,
+        "1": 676
+      },
+      "size": [
+        247.455078125,
+        427.63671875
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "meta_batch",
+          "type": "VHS_BatchManager",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4
+          ],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "frame_count",
+          "type": "INT",
+          "links": [
+            19
+          ],
+          "slot_index": 1,
+          "shape": 3
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "video_info",
+          "type": "VHS_VIDEOINFO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_LoadVideo"
+      },
+      "widgets_values": {
+        "video": "AnimateDiff_00001 (59).mp4",
+        "force_rate": 0,
+        "force_size": "Disabled",
+        "custom_width": 512,
+        "custom_height": 512,
+        "frame_load_cap": 16,
+        "skip_first_frames": 0,
+        "select_every_nth": 3,
+        "choose video to upload": "image",
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "frame_load_cap": 16,
+            "skip_first_frames": 0,
+            "force_rate": 0,
+            "filename": "AnimateDiff_00001 (59).mp4",
+            "type": "input",
+            "format": "video/mp4",
+            "select_every_nth": 3
+          }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "ImageResize+",
+      "pos": {
+        "0": 757,
+        "1": 739
+      },
+      "size": {
+        "0": 315,
+        "1": 218
+      },
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            5
+          ],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageResize+"
+      },
+      "widgets_values": [
+        384,
+        512,
+        "lanczos",
+        "stretch",
+        "always",
+        0
+      ]
+    },
+    {
+      "id": 4,
+      "type": "ADMD_InitializeTraining",
+      "pos": {
+        "0": 1239,
+        "1": 429
+      },
+      "size": {
+        "0": 400,
+        "1": 332
+      },
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "PIPELINE",
+          "link": 3
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 5
+        },
+        {
+          "name": "max_train_steps",
+          "type": "INT",
+          "link": 116,
+          "slot_index": 2,
+          "widget": {
+            "name": "max_train_steps"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "sanitycheck",
+          "type": "IMAGE",
+          "links": [
+            6,
+            71
+          ],
+          "slot_index": 0,
+          "shape": 3
+        },
+        {
+          "name": "admd_pipeline",
+          "type": "ADMDPIPELINE",
+          "links": [
+            121
+          ],
+          "slot_index": 1,
+          "shape": 3
+        },
+        {
+          "name": "lora_info",
+          "type": "LORAINFO",
+          "links": [
+            42
+          ],
+          "slot_index": 2,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ADMD_InitializeTraining"
+      },
+      "widgets_values": [
+        "dragon_camera",
+        "high speed camera motion",
+        500,
+        0.0005,
+        0.0001,
+        64,
+        440281405949852,
+        "randomize",
+        "Lion",
+        true
+      ]
     }
   ],
   "links": [
@@ -3385,14 +3572,6 @@
       7,
       0,
       "IMAGE"
-    ],
-    [
-      7,
-      4,
-      1,
-      8,
-      1,
-      "ADMDPIPELINE"
     ],
     [
       8,
@@ -3555,14 +3734,6 @@
       "LORAINFO"
     ],
     [
-      58,
-      54,
-      1,
-      12,
-      1,
-      "ADMDPIPELINE"
-    ],
-    [
       59,
       57,
       0,
@@ -3600,30 +3771,6 @@
       0,
       56,
       0,
-      "ADMDPIPELINE"
-    ],
-    [
-      64,
-      56,
-      1,
-      24,
-      1,
-      "ADMDPIPELINE"
-    ],
-    [
-      65,
-      58,
-      1,
-      28,
-      1,
-      "ADMDPIPELINE"
-    ],
-    [
-      66,
-      60,
-      1,
-      32,
-      1,
       "ADMDPIPELINE"
     ],
     [
@@ -4001,6 +4148,46 @@
       89,
       0,
       "IMAGE"
+    ],
+    [
+      121,
+      4,
+      1,
+      8,
+      0,
+      "ADMDPIPELINE"
+    ],
+    [
+      122,
+      54,
+      1,
+      12,
+      0,
+      "ADMDPIPELINE"
+    ],
+    [
+      123,
+      56,
+      1,
+      24,
+      0,
+      "ADMDPIPELINE"
+    ],
+    [
+      124,
+      58,
+      1,
+      28,
+      0,
+      "ADMDPIPELINE"
+    ],
+    [
+      125,
+      60,
+      1,
+      32,
+      0,
+      "ADMDPIPELINE"
     ]
   ],
   "groups": [
@@ -4014,10 +4201,18 @@
       ],
       "color": "#3f789e",
       "font_size": 24,
-      "locked": false
+      "flags": {}
     }
   ],
   "config": {},
-  "extra": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6934334949441353,
+      "offset": [
+        -211.34138270982706,
+        -134.12630847709306
+      ]
+    }
+  },
   "version": 0.4
 }
